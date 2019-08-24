@@ -1,0 +1,16 @@
+{
+  "name": "dsms_redux",
+  "version": "1.0.0",
+  "description": "Smaller version of Don't Shoot My Spaceship in Javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "game",
+    "j13kgames"
+  ],
+  "author": "wisekrakr",
+  "license": "MIT"
+}
