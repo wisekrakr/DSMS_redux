@@ -19,7 +19,7 @@ const Game = function(engine) {
     width:WIDTH,  
     
     numberOfAsteroids: 2,
-    numberOfEnemies: 0,
+    numberOfEnemies: 1,
 
     // Game Objects
     player:null,  
