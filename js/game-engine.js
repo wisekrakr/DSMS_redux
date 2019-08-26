@@ -5,19 +5,21 @@ const GameEngine = function(){
         gameObjects: new Set(),
         to_be_removed:new Set(),
 
-        /* Out of bounds Detection */
+        // Add an object to a set to further use in the game
         addObject : function(object) {
 
             this.gameObjects.add(object, object.tagNr);              
         },
 
-        /* Player Movement */
+        //Removes an object from the set that runs in the game. 
+        //This places the object outside of the game.
         removeObject : function(object) {   
 
             this.gameObjects.delete(object, object.tagNr);
             this.to_be_removed.add(object, object.tagNr);
         },
         
+        // Every object needs to run their respective update function.
         update : function(){
             
             for(let object of this.gameObjects){     
@@ -26,6 +28,7 @@ const GameEngine = function(){
             }
         },
 
+        //Returns the distance between two objects (hypot)
         distanceBetweenObjects : function(object1, object2){
             let attackDistanceX = object1.x - object2.x;
             let attackDistanceY = object1.y - object2.y;
@@ -33,10 +36,12 @@ const GameEngine = function(){
             return Math.hypot(attackDistanceX, attackDistanceY);
         },
 
+        //Returns the distance between two objects coordinates (x,y)
         distanceBetweenPoints : function(x1, y1, x2, y2){
             return Math.sqrt(Math.pow(x2 - x1,2) + Math.pow(y2 - y1,2));
         },
 
+        //Returns the angle between two objects. (atan2)
         angleBetweenObjects : function(object1, object2){
             let attackDistanceX = object1.x - object2.x;
             let attackDistanceY = object1.y - object2.y;
@@ -44,6 +49,7 @@ const GameEngine = function(){
             return Math.atan2(attackDistanceY, attackDistanceX);
         },
 
+        // Returns a collision tick. This is an optional function.
         collision : function(object){  
             for (let sub of this.gameObjects) {      
 
@@ -59,6 +65,7 @@ const GameEngine = function(){
             }
         },
 
+        // Returns an object that this.object collided with
         collisionObject : function(object){ 
             let collisionObject; 
 
@@ -67,7 +74,7 @@ const GameEngine = function(){
                 if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
                     
                     if (this.distanceBetweenPoints(object.x, object.y, sub.x, sub.y) < 
-                        object.height + sub.height && object.width + sub.width) {   
+                        object.width/1.75 + sub.width/1.75 && object.height/1.75 + sub.height/1.75) {   
 
                         collisionObject = sub;
                     }
@@ -76,12 +83,16 @@ const GameEngine = function(){
             return collisionObject;
         },
 
-
+        // Creates an explosion effect by creating debris objects
         explode : function(object, game){
             
             let debrisParts = [];
             for (let i = debrisParts.length; i < 5; i++) {      
-                debrisParts[i] = new Debris(game, object.x, object.y, object.width / i+1, object.height / i+1);
+                debrisParts[i] = new Debris(game, 
+                    object.x, object.y, 
+                    object.width / i+1, object.height / i+1, 
+                    object.color
+                    );
      
             } 
         },        

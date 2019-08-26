@@ -1,8 +1,9 @@
-const Debris = function(game, x, y, width, height) {
+const Debris = function(game, x, y, w, h, color) {
     
     this.tag        = "Debris";
-    this.width      = width;
-    this.height     = height;  
+    this.color      = color;
+    this.width      = w;   
+    this.height     = h;  
     this.velocity_x = Math.random() * 60 / FPS;
     this.velocity_y = Math.random() * 60 / FPS; 
     this.x          = x;

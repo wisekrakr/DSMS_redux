@@ -5,11 +5,23 @@ drawing colors to the buffer and then to the display. */
 
 const Display = function(canvas, game) {
 
-  const debug = true;
-
-  this.game = game;
+  const debug = true;  
+  
   this.buffer  = document.createElement("canvas").getContext("2d");
   this.context = canvas.getContext("2d");
+  this.game    = game;
+
+  let messageTime = 0;
+  let alpha = 1.0;
+  
+  // Drawing text on screen
+  // this.drawText = function(text, x, y){
+  
+  //   this.buffer.fillStyle = "rgba(255, 255, 255 " + textAlpha + ")";
+  //   this.buffer.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
+  //   this.buffer.fillText(text, x, y);
+  //   textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);    
+  // }
 
   // Drawing objects with four sides
   this.drawRectangle = function(object) {
@@ -44,9 +56,7 @@ const Display = function(canvas, game) {
     this.buffer.closePath();
     this.buffer.stroke();  
 
-  }
-
-  // TODO: Create with two polygons to simulate a 3-d object
+  }  
 
   // Drawing objects with multiple vertices
   this.drawPolygon = function(object) {
@@ -73,17 +83,7 @@ const Display = function(canvas, game) {
     this.buffer.stroke();  
 
   };
-
-  this.drawCircle = function(object){
-    this.buffer.fillStyle = this.game.colorPicker([
-      '#d62020',
-      '#ffe700'
-    ]);
-    this.buffer.beginPath();
-    this.buffer.arc(object.x, object.y, object.height, 0, Math.PI * 2, false); 
-    this.buffer.fill();
-  }
-
+  
   this.debugBounds = function(object){
     if(debug){
       this.buffer.strokeStyle = "#3efffa";
@@ -97,6 +97,13 @@ const Display = function(canvas, game) {
       this.buffer.stroke();
     }
   };
+  
+  this.drawCircle = function(object){
+    this.buffer.fillStyle = object.color;
+    this.buffer.beginPath();
+    this.buffer.arc(object.x, object.y, object.height, 0, Math.PI * 2, false); 
+    this.buffer.fill();
+  }
 
   this.fill = function(color) {
 
@@ -105,21 +112,128 @@ const Display = function(canvas, game) {
 
   };
 
-  this.rotation = function(angle){
-    // // Clear the canvas
-    // this.context.clearRect(0, 0, this.buffer.canvas.width, this.buffer.canvas.height);
-      
-    // Move registration point to the center of the canvas
-    this.context.translate(this.buffer.canvas.width/2, this.buffer.canvas.height/2);
+  // Shows Time on screen
+  this.showTime = function(delta){
 
-    // Rotate in degrees
-    this.context.rotate(angle);
-      
-    // Move registration point back to the top left corner of canvas
-    this.context.translate(-this.buffer.canvas.width/2, -this.buffer.canvas.height/2);
+    this.buffer.fillStyle = "#ffffff";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
+    this.buffer.fillText(
+      "Time: " + delta, 
+      30, this.game.world.height - 70
+      );
+  }
+
+  // Shows the percentage that is left for the player
+  this.showPlayerLive = function(){
+    
+    this.buffer.fillStyle = "#ffffff";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
+    this.buffer.fillText(
+      "Live: " + Math.round(this.game.world.player.live), 
+      30, this.game.world.height - 50
+      );
+    
+  }
+
+  // Shows Game Over text
+  this.showGameOver = function(){
+    
+    this.buffer.fillStyle = "#ffffff";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE*4 + "px dejavu sans mono";
+    this.buffer.fillText(
+      "GAME OVER", 
+      this.game.world.width/4, this.game.world.height/2
+      );
+    
+  }  
+
+  //Show Death time
+  this.showDeathTime = function(){
+    this.buffer.fillStyle = "#ffffff";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
+    this.buffer.fillText(
+      "Continue: " + Math.round(this.game.world.deathTime), 
+      30, this.game.world.height - 70
+    );
   }
 
   this.render = function() { 
+
+    // The time spend in this game. Not total play time.
+    let time = Math.round(this.game.world.timeKeeper);
+    // Clock to get the total time running
+    let clock = (this.game.instance.spaceEngine.clock/1000); 
+
+    // GUI
+    if(this.game.world.player !== null){
+      if(this.game.world.player.live > 0){
+        // Show Time on screen
+        this.showTime(time);
+        // Show Player Live percentage on screen
+        this.showPlayerLive();
+
+        alpha = 1.0;
+      }else{
+        // Shows Game over text
+       
+        if(alpha > 0){
+         
+          this.showGameOver();
+          alpha -= (1.0 / TEXT_FADE_TIME / this.game.world.fps);            
+        }
+
+        this.buffer.fillStyle = "#ffffff";
+        this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px dejavu sans mono";
+        this.buffer.fillText(
+          "Continue: " + Math.round(RESPAWN_TIME - alpha * -this.game.world.fps/10 - 6), 
+          this.game.world.width/4, this.game.world.height/4
+        );
+      }
+    }
+
+
+    // Game messages 
+    let textAlpha =  this.game.world.textAlpha;
+   
+    if(textAlpha > 0){
+      if(this.game.world.sendMessage){    
+              
+        this.buffer.fillStyle = "rgba(168,207,254 " + textAlpha + ")";
+        this.buffer.font = "small-caps bold " + TEXT_SIZE + "px arial sans mono";
+
+        if(!(this.game.world.textObject instanceof Player)){
+          this.buffer.fillText(
+            this.game.world.text, 
+            this.game.world.textObject.x - ((this.game.world.textObject.width * 4) /2) + this.game.world.textObject.width/2, 
+            this.game.world.textObject.y - 35,
+            this.game.world.textObject.width * 4
+          );
+        }else{
+          this.buffer.fillText(
+            this.game.world.text, 
+            this.game.world.textObject.x - ((this.game.world.textObject.width * 8) /2) + this.game.world.textObject.width/2, 
+            this.game.world.textObject.y - 35,
+            this.game.world.textObject.width * 8
+          );
+        }
+
+        
+
+        if(messageTime === 0){
+          messageTime = clock     
+        }      
+
+        if(clock - messageTime >= MESSAGE_TIME){
+          this.game.world.sendMessage = false;
+        
+          messageTime = 0;        
+        }
+        
+      }
+      textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);     
+    }else{
+      
+    }
        
     this.context.drawImage(
       this.buffer.canvas, 

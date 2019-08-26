@@ -1,10 +1,10 @@
-const Asteroid = function(game,x, y) {
+const Asteroid = function(game,x, y, w, h) {
 
     this.tag        = "Asteroid";
     this.tagNr      = Math.random();
     this.color      = "#ffffff";
-    this.width      = AS_WIDTH;
-    this.height     = AS_HEIGHT;
+    this.width      = w;    
+    this.height     = h;   
     this.velocity_x = Math.random() * AS_SPEED / FPS *(Math.random() < 0.5 ? 1 : -1);
     this.velocity_y = Math.random() * AS_SPEED / FPS *(Math.random() < 0.5 ? 1 : -1);
     this.angle      = Math.random() * Math.PI * 2;
@@ -28,16 +28,21 @@ Asteroid.prototype = {
 
     constructor : Asteroid,  
     explodeTime: EXPLODE_TIME,
+    collidedWith: null,
 
     collide: function () {       
         if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
             this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
             this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser){
+          
+            this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+
           return true;
         }
       
         return false;         
-      },
+    },
+    
    
     update: function() {
          
@@ -47,7 +52,7 @@ Asteroid.prototype = {
             if(this.explodeTime > 0){
                 this.game.instance.gameEngine.gameEngine.explode(this, this.game);
 
-                this.explodeTime--;                
+                this.explodeTime--;    
             }
 
         }else{

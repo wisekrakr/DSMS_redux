@@ -17,7 +17,7 @@ window.addEventListener("load", function(event) {
   
         display.fill(game.world.background_color);// Clear background to game's background color.
         
-        // Give gameobjects their shape and color
+        // Give gameobjects their shape and color        
 
         for(let sub of game.instance.gameEngine.gameEngine.gameObjects){    
             let object = sub;
@@ -28,17 +28,20 @@ window.addEventListener("load", function(event) {
                 case 'Player':                                                           
                     display.drawTriangle(object);     
                     if(object.invul){
-                        display.buffer.globalAlpha = 0.2;
+                        display.context.globalAlpha = 0.2;
                         game.world.fps = 80;
                     }else{
-                        display.buffer.globalAlpha = 1;
+                        display.context.globalAlpha = 1;
                         game.world.fps = FPS;
                     }
                     break;
                 case 'Thruster':
                     display.drawTriangle(object);     
                     break;
-                case 'Debris': case 'Laser':
+                case 'Debris': 
+                    display.drawCircle(object);
+                    break;
+                case 'Laser':
                     display.drawCircle(object);
                     break;
                 case 'Asteroid': case 'Meteor':                  
@@ -57,7 +60,8 @@ window.addEventListener("load", function(event) {
         display.render();  
     };
   
-    let update = function() {        
+    let update = function() {           
+      
          
         // Player Controls
         if (controller.left.active)  { game.world.player.moveLeft();}
@@ -85,7 +89,9 @@ window.addEventListener("load", function(event) {
             }
         }
 
-        game.update();            
+        game.update();           
+        
+        
       
     };
 
@@ -102,18 +108,17 @@ window.addEventListener("load", function(event) {
 
     
   
-    // Initialize Components
-  
+    // Initialize Components  
     
     /* The controller handles user input. */
     let controller = new Controller();        
     /* The engine is where the above three sections can interact. */
-    let engine = new Engine(1000/FPS, render, update);
+    let engine = new Engine(1000/FPS, render, update);        
     /* The game will hold our game logic. */
     let game = new Game(engine);
     /* The display handles window resizing, as well as the on screen canvas. */
-    let display = new Display(document.querySelector("canvas"), game);    
-   
+    let display = new Display(document.querySelector("canvas"), game);
+     
 
     /* Every pixel must be the same
     size as the world dimensions to properly scale the graphics. */

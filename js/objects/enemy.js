@@ -3,8 +3,8 @@ const Enemy = function(game, x, y) {
     this.tag        = "Enemy";
     this.tagNr      = Math.random();
     this.color      = "#00ff80";
-    this.width      = ENEMY_WIDTH;
-    this.height     = ENEMY_HEIGHT;
+    this.width      = ENEMY_WIDTH;   
+    this.height     = ENEMY_HEIGHT;   
     this.velocity_x = Math.random() * ENEMY_SPEED / FPS;
     this.velocity_y = Math.random() * ENEMY_SPEED / FPS;
     this.x          = x;
@@ -12,7 +12,8 @@ const Enemy = function(game, x, y) {
     this.angle      = 0;
     this.speed      = ENEMY_SPEED;
     this.turnSpeed  = ENEMY_TURN_SPEED;
-    this.rotation   = 0;    
+    this.rotation   = 0;  
+    this.range      = ENEMY_RANGE;  
     this.canShoot   = false;    
     this.game       = game;  
   
@@ -26,7 +27,7 @@ const Enemy = function(game, x, y) {
     lastShot: 0,
     fireRate: FIRE_RATE, 
     
-    // Function to move towards the player when in range of 300
+    // Function to move towards the player when in range 
     rotateToPlayer: function(){
       for(let sub of this.game.instance.gameEngine.gameEngine.gameObjects){    
         if(sub.tag === 'Player'){
@@ -34,7 +35,7 @@ const Enemy = function(game, x, y) {
           let target = sub;
 
           if(this.target !== null){
-            if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < 300){
+            if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < this.range){
 
               this.angle = this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
 
@@ -61,13 +62,15 @@ const Enemy = function(game, x, y) {
       }      
  
       if(this.canShoot){
+        this.game.world.messenger("You better run!", this);
         if(time - this.lastShot >= this.fireRate){
 
           new Laser(
             this.game,
             this.x + this.width/4 * Math.cos(this.angle),
             this.y + this.height * Math.sin(this.angle),
-            this.angle
+            this.angle,
+            this
           );
 
           this.lastShot = time;

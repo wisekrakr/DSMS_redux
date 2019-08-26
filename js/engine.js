@@ -18,6 +18,8 @@ const Engine = function(delta, update, render) {
     this.render = render; // The render function
   
     this.run = function(time) {// This is one cycle of the game loop
+
+      this.animationFrameRequest = window.requestAnimationFrame(this.handleRun);
   
       this.elapsedTime += time - this.clock;
       this.clock = time;
@@ -27,7 +29,7 @@ const Engine = function(delta, update, render) {
 
         this.elapsedTime = this.delta;
 
-      }
+      };
 
    
       /* See if enough has passed to update.  */
@@ -39,7 +41,7 @@ const Engine = function(delta, update, render) {
   
         this.updated = true;// If the game has updated, we need to draw it again.
   
-      }
+      };
   
       /* This allows us to only draw when the game has updated. */
       if (this.updated) {
@@ -47,9 +49,7 @@ const Engine = function(delta, update, render) {
         this.updated = false;
         this.render(time);
   
-      }
-  
-      this.animationFrameRequest = window.requestAnimationFrame(this.handleRun);
+      };
   
     };
   
