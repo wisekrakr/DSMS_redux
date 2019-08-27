@@ -106,6 +106,26 @@ const GameEngine = function(){
         }
     }
 
+    
+    this.loadJSON = function(path) {   
+
+        var request = new XMLHttpRequest();
+
+        request.overrideMimeType("application/json");
+        request.open('GET', path); 
+        request.responseType = 'json';
+        request.send();  
+
+        let messages;
+
+        request.onload = function(){
+            messages = request.response;
+        }
+
+        return messages;
+    };
+
+
     this.update = function() {
      
         this.gameEngine.update();

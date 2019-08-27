@@ -25,12 +25,27 @@ const Enemy = function(game, x, y) {
     constructor : Enemy,   
     explodeTime: EXPLODE_TIME,
     lastShot: 0,
-    fireRate: FIRE_RATE, 
+    fireRate: FIRE_RATE,   
+    messages:[
+      "You better run!",
+      "Imma gonna get ya",
+      "I got a bad feeling about this",
+      "Don't get cocky",
+      "Kamehameha",
+      "Do you know Wisekrakr?",
+      "I'm Batman!",
+      "Weehoo!"
+    ], 
+    currentMessage:null, 
+
+    pickMessage: function(){      
+        return this.messages[Math.floor(Math.random() * this.messages.length)];         
+    },
     
     // Function to move towards the player when in range 
     rotateToPlayer: function(){
       for(let sub of this.game.instance.gameEngine.gameEngine.gameObjects){    
-        if(sub.tag === 'Player'){
+        if(sub instanceof Player){
           
           let target = sub;
 
@@ -47,6 +62,15 @@ const Enemy = function(game, x, y) {
                            
             }
           }
+        }else if(sub instanceof Asteroid){
+          let target = sub;
+
+          if(this.target !== null){
+            if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < (this.width + target.width) + 20){
+
+              this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
+            }
+          }
         }
       }
     },
@@ -61,8 +85,12 @@ const Enemy = function(game, x, y) {
         this.lastShot = time;
       }      
  
-      if(this.canShoot){
-        this.game.world.messenger("You better run!", this);
+      if(this.canShoot){        
+
+        if(this.currentMessage === null){
+          this.currentMessage = this.pickMessage();
+        }
+        this.game.world.messenger(this.currentMessage, this);
         if(time - this.lastShot >= this.fireRate){
 
           new Laser(
@@ -87,7 +115,7 @@ const Enemy = function(game, x, y) {
       return false;         
     },
     
-    update: function() {     
+    update: function() {    
       
       if(!this.collide()){
 

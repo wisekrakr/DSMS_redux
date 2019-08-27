@@ -7,8 +7,9 @@ const FPS = 30;
 /* Game constants */
 
 const EXPLODE_TIME = Math.ceil(0.3 * FPS); //Duration of explosion animation
-const WORLD_AS_NUM = 3; //Begin stage: 3 asteroids
+const WORLD_AS_NUM = 12; //Begin stage: 3 asteroids
 const WORLD_EN_NUM = 1; //Begin stage: 1 enemy
+const WISE_HIGH_SCORES = "wisekrakr highscores";
 
 /* Player constants */
 
@@ -26,9 +27,9 @@ const CENTER_Y = window.innerHeight/2; //Start position on the Y-axis for the pl
 
 const ENEMY_WIDTH = WIDTH /40;
 const ENEMY_HEIGHT = HEIGHT/60; 
-const ENEMY_SPEED = 2 * FPS;
+const ENEMY_SPEED = 4 * FPS;
 const ENEMY_TURN_SPEED = 6 * FPS;
-const ENEMY_RANGE = 200;
+const ENEMY_RANGE = 350;
 
 /* Laser constants */
 
@@ -40,8 +41,8 @@ const FIRE_RATE = 0.06 * FPS; //Duration of explosion animation
 
 /* Asteroid constants */
 
-const AS_WIDTH = WIDTH/40; // Asteroid radius
-const AS_HEIGHT = HEIGHT/40; // Asteroid height
+const AS_WIDTH = WIDTH/25; // Asteroid radius
+const AS_HEIGHT = HEIGHT/25; // Asteroid height
 const AS_SPEED = 1.7 * FPS;// Asteroid speed
 const AS_ROTATE_SPEED = 0.06 * FPS;;// Asteroid speed
 const VERTICES = 10;// Asteroid number of vertices of polygon

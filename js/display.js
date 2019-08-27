@@ -115,24 +115,44 @@ const Display = function(canvas, game) {
   // Shows Time on screen
   this.showTime = function(delta){
 
-    this.buffer.fillStyle = "#ffffff";
+    this.buffer.fillStyle = "#e3e3e3";
     this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
     this.buffer.fillText(
       "Time: " + delta, 
-      30, this.game.world.height - 70
+      30, this.game.world.height - 90
       );
   }
 
   // Shows the percentage that is left for the player
   this.showPlayerLive = function(){
     
-    this.buffer.fillStyle = "#ffffff";
+    this.buffer.fillStyle = "#e3e3e3";
     this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
     this.buffer.fillText(
       "Live: " + Math.round(this.game.world.player.live), 
+      30, this.game.world.height - 70
+      );    
+  }
+
+  // Shows Score on the screen
+  this.showScore = function(){
+    this.buffer.fillStyle = "#e3e3e3";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
+    this.buffer.fillText(
+      "Score: " + Math.round(this.game.world.score), 
       30, this.game.world.height - 50
-      );
+    );
+  }
+
+  // Shows High Score on the screen
+  this.showHighScore = function(){
     
+    this.buffer.fillStyle = "#ffffff";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px dejavu sans mono";
+    this.buffer.fillText(
+      "High Score: " + Math.round(localStorage.getItem(WISE_HIGH_SCORES)), 
+      this.game.world.width/3, 50
+    );
   }
 
   // Shows Game Over text
@@ -156,6 +176,7 @@ const Display = function(canvas, game) {
       30, this.game.world.height - 70
     );
   }
+  
 
   this.render = function() { 
 
@@ -171,6 +192,10 @@ const Display = function(canvas, game) {
         this.showTime(time);
         // Show Player Live percentage on screen
         this.showPlayerLive();
+        // Show score on screen
+        this.showScore();
+        // Show High Score on screen
+        this.showHighScore();
 
         alpha = 1.0;
       }else{
@@ -185,7 +210,7 @@ const Display = function(canvas, game) {
         this.buffer.fillStyle = "#ffffff";
         this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px dejavu sans mono";
         this.buffer.fillText(
-          "Continue: " + Math.round(RESPAWN_TIME - alpha * -this.game.world.fps/10 - 6), 
+          "Continue: " + Math.round(RESPAWN_TIME - alpha * -this.game.world.fps/10 - 7), 
           this.game.world.width/4, this.game.world.height/4
         );
       }

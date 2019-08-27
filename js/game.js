@@ -21,6 +21,7 @@ const Game = function(engine) {
     
     timeKeeper:0,
     deathTime:0,
+    score:0,    
 
     numberOfAsteroids: WORLD_AS_NUM,
     numberOfEnemies: WORLD_EN_NUM,
@@ -36,7 +37,7 @@ const Game = function(engine) {
     messages:new Set(),
     textObject:null,
     text: "Don't let anything hit you!",
-    textAlpha:1.0,
+    textAlpha:1.0, 
 
     /* Out of bounds Detection */
     outOfBounds:function(object) {
@@ -56,6 +57,15 @@ const Game = function(engine) {
       }      
     },
 
+    /* When objects are at the outer rims of the screen they will shrink in size */
+    perspective:function(object){
+      let distance = this.instance.gameEngine.gameEngine.distanceBetweenPoints(
+        object.x, this.width, object.y, this.height);
+
+     
+    },
+    
+    /* Links a message to a game object  */
     messenger:function(message, object){      
       // this.messages.add(message, object);
 
@@ -68,11 +78,19 @@ const Game = function(engine) {
       }
     },
 
+    
      /* Diffulty Changes and Messages */
     checkProgression:function(){
       let delta = engine.delta /1000;
       
       this.timeKeeper += delta;
+
+      localStorage.setItem(WISE_HIGH_SCORES, 0);
+
+      if(this.score > parseInt(localStorage.getItem(WISE_HIGH_SCORES))){       
+
+        localStorage.setItem(WISE_HIGH_SCORES, this.score);
+      }
            
       switch(Math.round(this.timeKeeper)){          
         case 60:
@@ -129,18 +147,17 @@ const Game = function(engine) {
 
   // Function to split asteroids in two
   this.splitAsteroid = function(object){
-    if(object.width === AS_WIDTH && object.height === AS_HEIGHT){
+        
 
-      let bits = Math.random() * 5;
+    for(let i = 0; i < 3; i++){
 
-      for(let i = 0; i < bits; i++){
-        if(AS_WIDTH/bits > 5 && AS_HEIGHT/bits > 5){
-          new Asteroid(this, object.x, object.y, AS_WIDTH/bits, AS_HEIGHT/bits);
-        }else{
-          this.instance.gameEngine.gameEngine.removeObject(object); 
-        }
+      if(object.width/3 > 5 && object.height/3 > 5){
+        new Asteroid(this, object.x, object.y, object.width/3, object.height/3);
+      }else{
+        this.instance.gameEngine.gameEngine.removeObject(object); 
       }
     }
+    
   },
 
   //Function to create an array of enemies
@@ -174,46 +191,54 @@ const Game = function(engine) {
   this.explosionHandler = function(object){
     
     // Handle exploding objects
-    if(object.tag !== "Thruster" && object.tag !== 'Debris'){        
-
-      if(object.explodeTime <= 0){                 
+    if(object.tag !== "Thruster" && object.tag !== 'Debris'){             
+      
+      if(object.explodeTime <= 0){                      
         
         if(object instanceof Player){
-
           
         }else if(object instanceof Asteroid){
 
           this.world.asteroids.delete(object);
           this.splitAsteroid(object);
           this.instance.gameEngine.gameEngine.removeObject(object);
+
+          this.world.score += (object.width + object.height) / 2;
           
         }else if(object instanceof Enemy){
 
           this.world.enemies.delete(object);
           this.instance.gameEngine.gameEngine.removeObject(object);   
 
+          this.world.score += (object.width + object.height) / 2;
+
         }else if(object instanceof Laser){       
 
           this.instance.gameEngine.gameEngine.removeObject(object);              
-        }                  
-      }        
+        }        
+        
+      }
     }    
   },
 
   this.worldRunner = function(){   
     if(this.world.player === null){
       this.world.player = new Player(this);
+
+      this.world.score = 0;
+      this.world.timeKeeper = 0;
+
       console.log("New Player Created");
        
     }else{       
-
-      this.world.checkProgression();
       
-
+      
       if(this.world.player.live <= 0){
         // GAME OVER
         this.instance.gameEngine.gameEngine.removeObject(this.world.player); 
-        
+        this.instance.gameEngine.gameEngine.removeObject(this.world.player.thruster); 
+
+                
         let clock = (this.instance.spaceEngine.clock/1000);
 
         if(this.world.deathTime === 0){
@@ -225,8 +250,12 @@ const Game = function(engine) {
           this.destroyWorld();
         
           this.world.deathTime = 0;        
-        }
+        }   
+        
+        this.world.checkProgression();
       }
+
+
 
       for(let object of this.instance.gameEngine.gameEngine.gameObjects){       
       
@@ -234,7 +263,7 @@ const Game = function(engine) {
         this.world.outOfBounds(object);    
 
         // Handle exploding objects
-        this.explosionHandler(object);
+        this.explosionHandler(object);        
       }
     }
   }
