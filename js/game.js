@@ -108,7 +108,7 @@ const Game = function(engine) {
      
       
       switch(Math.round(this.timeKeeper)){   
-        case 3:
+        case 27:
           this.letItRain = true;  
           this.messenger("Look out!", this.player);    
           break;        
