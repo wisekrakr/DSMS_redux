@@ -1,9 +1,12 @@
 const GameEngine = function(){
 
+    /**
+     * The Engine that holds objects and updates them.
+     */
     this.gameEngine = {
 
         gameObjects: new Set(),
-        to_be_removed:new Set(),
+        toBeRemoved:new Set(),
 
         // Add an object to a set to further use in the game
         addObject : function(object) {
@@ -16,74 +19,53 @@ const GameEngine = function(){
         removeObject : function(object) {   
 
             this.gameObjects.delete(object, object.tagNr);
-            this.to_be_removed.add(object, object.tagNr);
-        },
-        
-        // Every object needs to run their respective update function.
-        update : function(){
-            
-            for(let object of this.gameObjects){     
-
-                object.update();            
-            }
+            this.toBeRemoved.add(object, object.tagNr);
         },
 
-        //Returns the distance between two objects (hypot)
+        /**
+         * Returns the distance between two objects (hypot)
+         * 
+         * @param  {} object1 Object that uses this function
+         * @param  {} object2 Object that this function is used on.
+         */
         distanceBetweenObjects : function(object1, object2){
             let attackDistanceX = object1.x - object2.x;
             let attackDistanceY = object1.y - object2.y;
 
             return Math.hypot(attackDistanceX, attackDistanceY);
         },
-
-        //Returns the distance between two objects coordinates (x,y)
+        
+        /**
+         * Returns the distance between two objects coordinates (x,y)
+         * 
+         * @param  {} x1 position on x axis for Object that uses this function
+         * @param  {} y1 position on y axis for Object that uses this function
+         * @param  {} x2 position on x axis for Object that this function is used on.
+         * @param  {} y2 position on y axis for Object that this function is used on.
+         */
         distanceBetweenPoints : function(x1, y1, x2, y2){
             return Math.sqrt(Math.pow(x2 - x1,2) + Math.pow(y2 - y1,2));
         },
-
-        //Returns the angle between two objects. (atan2)
+        
+        /**
+         * Returns the angle between two objects. (atan2)
+         * 
+         * @param  {} object1 Object that uses this function
+         * @param  {} object2 Object that this function is used on.
+         */
         angleBetweenObjects : function(object1, object2){
             let attackDistanceX = object1.x - object2.x;
             let attackDistanceY = object1.y - object2.y;
 
             return Math.atan2(attackDistanceY, attackDistanceX);
-        },
+        },        
 
-        // Returns a collision tick. This is an optional function.
-        collision : function(object){  
-            for (let sub of this.gameObjects) {      
-
-                if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
-                    
-                    if (this.distanceBetweenObjects(object, sub) < object.height + sub.height ||
-                        this.distanceBetweenObjects(object, sub) < object.width + sub.width) {                
-                        return true;
-                    }else{
-                        return false;
-                    }    
-                }
-            }
-        },
-
-        // Returns an object that this.object collided with
-        collisionObject : function(object){ 
-            let collisionObject; 
-
-            for (let sub of this.gameObjects) {      
-
-                if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
-                    
-                    if (this.distanceBetweenPoints(object.x, object.y, sub.x, sub.y) < 
-                        object.width/1.75 + sub.width/1.75 && object.height/1.75 + sub.height/1.75) {   
-
-                        collisionObject = sub;
-                    }
-                }
-            }
-            return collisionObject;
-        },
-
-        // Creates an explosion effect by creating debris objects
+        /**
+         * Creates an explosion effect by creating debris objects
+         * 
+         * @param  {} object Object that uses this function
+         * @param  {} game Current running game
+         */
         explode : function(object, game){
             
             let debrisParts = [];
@@ -95,37 +77,67 @@ const GameEngine = function(){
                     );
      
             } 
-        },        
+        },  
 
-        size : function(obj) {
-            var size = 0, key;
-            for (key in obj) {
-                if (obj.hasOwnProperty(key)) size++;
-            }
-            return size;
-        }
-    }
+        /**
+         * Returns a collision tick. This is an optional function.
+         * 
+         * @param  {} object Object that uses this function
+         */
 
+        collision : function(object){       
     
-    this.loadJSON = function(path) {   
+            for (let sub of this.gameObjects) {      
+    
+                if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
+                    
+                    if (this.distanceBetweenObjects(object, sub) < object.height + sub.height ||
+                        this.distanceBetweenObjects(object, sub) < object.width + sub.width) {                
+                        return true;
+                    }else{
+                        return false;
+                    }    
+                }
+            }
+            
+        },
+        
+        /**
+         * Returns an object that this.object collided with
+         * 
+         * @param  {} object Object that uses this function
+         */
+        collisionObject : function(object){ 
+            let collisionObject;       
+               
+            for (let sub of this.gameObjects) {      
+    
+                if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
+                    
+                    if (this.distanceBetweenPoints(object.x, object.y, sub.x, sub.y) < 
+                        object.width/1.75 + sub.width/1.75 && object.height/1.75 + sub.height/1.75) {   
+    
+                        collisionObject = sub;
+                    }
+                }
+            }        
+            
+            return collisionObject;
+        },
+        
+        // Every object needs to run their respective update function.
+        update : function(){
+            
+            for(let object of this.gameObjects){     
 
-        var request = new XMLHttpRequest();
-
-        request.overrideMimeType("application/json");
-        request.open('GET', path); 
-        request.responseType = 'json';
-        request.send();  
-
-        let messages;
-
-        request.onload = function(){
-            messages = request.response;
+                object.update();            
+            }
         }
-
-        return messages;
-    };
-
-
+    }   
+    
+    /**
+     * Updates the Game Engine that holds objects and updates them.
+     */
     this.update = function() {
      
         this.gameEngine.update();

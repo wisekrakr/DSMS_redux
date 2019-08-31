@@ -1,11 +1,21 @@
 /* David Damian 15/08/2019 */
 
-const Game = function(engine) {  
-  
-  /* The instance of the game's spaceEngine and gameEngine */
+/**
+ * Holds the game world. Creates a new instance of the Game Engine
+ * Creates the game objects and game rules. 
+ * 
+ * @param  {} engine the engine that runs the game
+ */
+const Game = function(engine) {    
+    
+  /**
+   * This instance of the game's spaceEngine and gameEngine
+   */
   this.instance = {
+    
     gameEngine: new GameEngine(),   
     spaceEngine: engine
+      
   };
 
   this.world = {
@@ -17,7 +27,7 @@ const Game = function(engine) {
     friction:0.9,  
 
     height:HEIGHT,
-    width:WIDTH,  
+    width:WIDTH,   
     
     timeKeeper:0,
     deathTime:0,
@@ -31,15 +41,20 @@ const Game = function(engine) {
     asteroids:new Set(),
     enemies:new Set(), 
     meteorShower:new Set(),
+
+    letItRain: false,
          
     // Text messages
-    sendMessage: false,    
-    messages:new Set(),
+    sendMessage: false,   
     textObject:null,
-    text: "Don't let anything hit you!",
-    textAlpha:1.0, 
+    text: "Don't let anything hit you!",   
 
-    /* Out of bounds Detection */
+   
+    /**
+     * Out of bounds Detection
+     * 
+     * @param  {} object game object
+     */
     outOfBounds:function(object) {
  
       if(object.x < 0 - object.width) {
@@ -56,18 +71,15 @@ const Game = function(engine) {
         object.y = 0 - object.height;    
       }      
     },
-
-    /* When objects are at the outer rims of the screen they will shrink in size */
-    perspective:function(object){
-      let distance = this.instance.gameEngine.gameEngine.distanceBetweenPoints(
-        object.x, this.width, object.y, this.height);
-
-     
-    },
     
-    /* Links a message to a game object  */
-    messenger:function(message, object){      
-      // this.messages.add(message, object);
+    /**
+     * Links a message to a game object and sets sendMessage to true,
+     * so that we know that the display needs to render a message.
+     * 
+     * @param  {} message string text
+     * @param  {} object sender of message
+     */
+    messenger:function(message, object){   
 
       this.sendMessage = true;      
   
@@ -77,27 +89,37 @@ const Game = function(engine) {
       
       }
     },
-
-    
-     /* Diffulty Changes and Messages */
+ 
+    /**
+     * Diffulty Changes and Messages.
+     * 
+     * The game is based on time and this will keep track of that and create scenarios
+     * for that time.
+     * Keeps track of the high score.
+     */
     checkProgression:function(){
-      let delta = engine.delta /1000;
-      
-      this.timeKeeper += delta;
-
+            
       localStorage.setItem(WISE_HIGH_SCORES, 0);
 
       if(this.score > parseInt(localStorage.getItem(WISE_HIGH_SCORES))){       
 
         localStorage.setItem(WISE_HIGH_SCORES, this.score);
       }
-           
-      switch(Math.round(this.timeKeeper)){          
+     
+      
+      switch(Math.round(this.timeKeeper)){   
+        case 3:
+          this.letItRain = true;  
+          this.messenger("Look out!", this.player);    
+          break;        
+        case 59:
+          this.letItRain = false;
+          break;
         case 60:
           this.numberOfAsteroids = WORLD_AS_NUM*2;
           this.numberOfEnemies = WORLD_EN_NUM*2;
 
-          this.messenger("One minute passed", this.player);        
+          this.messenger("One minute passed", this.player);
           break;
         case 120:
           this.numberOfAsteroids = WORLD_AS_NUM*3;
@@ -110,25 +132,28 @@ const Game = function(engine) {
           this.numberOfEnemies = WORLD_EN_NUM*4;
 
           this.messenger("Three minutes passed", this.player);
-          break;
+          break;       
         case 240:
           this.numberOfAsteroids = WORLD_AS_NUM*5;
           this.numberOfEnemies = WORLD_EN_NUM*5;
-
           this.messenger("Four minutes passed", this.player);
           break;
       }
     }    
-  };
-  
-  
-
-  // Set a flickering effect with an array of colors
+  }; 
+ 
+  /**
+   * Set a flickering effect with an array of colors
+   * 
+   * @param  {} colors an array of color hexes
+   */
   this.colorPicker = function(colors){    
     return colors[getRandomInt(colors.length)];
   },
 
-  //Function to create an array of asteroids 
+  /**
+   * Creates asteroids at random coordinates, but away from the player
+   */
   this.setAsteroidBelt = function(){  
     let x,y;   
     
@@ -145,9 +170,12 @@ const Game = function(engine) {
     }
   }, 
 
-  // Function to split asteroids in two
-  this.splitAsteroid = function(object){
-        
+  /**
+   * Creates 3 new Asteroids from the original width and height of the exploded Asteroid (object).
+   * 
+   * @param  {} object the Asteroid that needs to be split in 3
+   */
+  this.splitAsteroid = function(object){        
 
     for(let i = 0; i < 3; i++){
 
@@ -156,11 +184,12 @@ const Game = function(engine) {
       }else{
         this.instance.gameEngine.gameEngine.removeObject(object); 
       }
-    }
-    
+    }    
   },
-
-  //Function to create an array of enemies
+  
+  /**
+   * Creates enemies at random coordinates, but away from the player
+   */
   this.setEnemies = function(){  
     let x,y;   
 
@@ -176,18 +205,26 @@ const Game = function(engine) {
       this.world.enemies.add(new Enemy(this, x, y));
     }
   }, 
-
-  //Function to create an array of asteroids 
+  
+  /**
+   * Creates meteors add random coordinates.
+   */
   this.setMeteorShower = function(){    
     x = Math.floor(Math.random()* this.world.width);
     y = Math.floor(Math.random()* this.world.height);     
 
-    for(let i = 30; i > this.world.meteorShower.size; i--){    
+    for(let i = Math.round(WORLD_AS_NUM/2); i > this.world.meteorShower.size; i--){    
       this.world.meteorShower.add(new Meteor(this, x, y));
     }
   },
   
-  // Go through all objects and handle their respective behavior when exploding
+  
+  /**
+   * Handles behavior of object that is exploding.
+   * Adds to score when certain objects explode.
+   * 
+   * @param  {} object exploding game object
+   */
   this.explosionHandler = function(object){
     
     // Handle exploding objects
@@ -221,61 +258,97 @@ const Game = function(engine) {
     }    
   },
 
+  /**
+   * This will run the game mechanics. Creates player and keeps track of time, live and death.
+   * This will run the outOfBounds and explosionHandler functions.
+   * This will also hold special events that happen during the game. 
+   */
   this.worldRunner = function(){   
     if(this.world.player === null){
       this.world.player = new Player(this);
 
       this.world.score = 0;
       this.world.timeKeeper = 0;
-
+      
       console.log("New Player Created");
        
     }else{       
+   
+      let delta = engine.delta /1000;
       
+      this.world.timeKeeper += delta;
       
       if(this.world.player.live <= 0){
         // GAME OVER
         this.instance.gameEngine.gameEngine.removeObject(this.world.player); 
         this.instance.gameEngine.gameEngine.removeObject(this.world.player.thruster); 
-
                 
-        let clock = (this.instance.spaceEngine.clock/1000);
+        let clock = (this.instance.spaceEngine.clock/1000);    
 
         if(this.world.deathTime === 0){
           this.world.deathTime = clock;       
         }      
         
         if(clock - this.world.deathTime >= RESPAWN_TIME){
-          this.world.player = null;
-          this.destroyWorld();
-        
-          this.world.deathTime = 0;        
+          this.world.player = null; // Player is null will start a new game
+          this.destroyWorld(); // Remove everything from display and start anew                        
         }   
         
+        
+      }else{
+
+        // Conditions for when a player arrives at certain time frame and score setter
         this.world.checkProgression();
-      }
 
+        // case 25 of checkProgression: Create Meteorswwwww
+        
+          if(this.world.letItRain){
+            this.setMeteorShower();
+            // Make Meteors explode to create trails of Debris    
+            for(let met of this.world.meteorShower){         
+              this.instance.gameEngine.gameEngine.explode(met, this); 
+            }
+          }else{
+            // Remove meteors
+            for(let met of this.world.meteorShower){    
+              this.instance.gameEngine.gameEngine.removeObject(met); 
+            }
+            this.world.meteorShower.clear();
+          }
+        
 
-
-      for(let object of this.instance.gameEngine.gameEngine.gameObjects){       
+        for(let object of this.instance.gameEngine.gameEngine.gameObjects){       
       
-        // When object goes out of bounds it will return from the opposite side
-        this.world.outOfBounds(object);    
+          // When object goes out of bounds it will return from the opposite side
+          this.world.outOfBounds(object);    
 
-        // Handle exploding objects
-        this.explosionHandler(object);        
+          // Handle exploding objects
+          this.explosionHandler(object);        
+        }
       }
     }
   }
 
+  /**
+   * Get all active game objects and clear them from all sets/arrays
+   * Set death time to 0.
+   * This will clear all information and we can start a new world.
+   */
   this.destroyWorld = function(){
     for(let object of this.instance.gameEngine.gameEngine.gameObjects){ 
       this.instance.gameEngine.gameEngine.removeObject(object); 
       this.world.enemies.clear();
       this.world.asteroids.clear();
+      this.world.meteorShower.clear();
+      this.world.deathTime = 0; 
     }
   }
-
+  
+  /**
+   * Update the world and the Game Engine.
+   * We can keep track of asteroids and enemies to add new ones
+   * when one gets removed.
+   */
   this.update = function() {    
     
     this.worldRunner();    
@@ -284,10 +357,9 @@ const Game = function(engine) {
     if(this.world.player !== null){
       this.setAsteroidBelt();
       this.setEnemies();
-      // this.setMeteorShower();
+      
     }
   };
-
 };
 
 Game.prototype = { constructor : Game };

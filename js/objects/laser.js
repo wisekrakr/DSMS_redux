@@ -2,7 +2,7 @@ const Laser = function(game,x, y, a, parent) {
 
     this.tag        = "Laser";
     this.tagNr      = Math.random();
-    this.color      = "#faa98b";
+    this.color      = "rgb(255,165,0)";
     this.width      = LASER_WIDTH; 
     this.height     = LASER_HEIGHT;   
     this.velocity_x = LASER_SPEED / FPS;
@@ -23,24 +23,20 @@ Laser.prototype = {
     constructor : Laser,    
 
     collide: function () {       
-        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid) {
+        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid ||
+            this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player) {
 
           return true;
-
-        }else if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player){
-          
-        //   this.game.world.messenger("Got ya bitch", parent);
-        }
-      
+        }      
         return false;           
     },
    
     update: function() {
 
         this.color = this.game.colorPicker([
-            "#ffa500",
-            "#ffd700",
-            "#ed1a26"
+            "rgb(255,165,0)",
+            "rgb(255,215,0)",
+            "rgb(237,26,38)"
         ]);
          
         if(this.collide()){

@@ -1,11 +1,15 @@
 /* David Damian 15/08/2019 */
 
+/**
+ * The load listener ensures that this code will not
+ * execute until the document has finished loading and we
+ * have access to all of my classes.
+ */
 
-/*  The load listener ensures that this code will not
-execute until the document has finished loading and I have access to all of my classes. */
-window.addEventListener("load", function(event) {
+window.addEventListener("load", function() {
 
     "use strict";
+    let paused = false;
 
     let keyDownUp = function(event) {
 
@@ -21,9 +25,7 @@ window.addEventListener("load", function(event) {
 
         for(let sub of game.instance.gameEngine.gameEngine.gameObjects){    
             let object = sub;
-           
-            // display.debugBounds(object);
-            
+                                  
             switch(object.tag){
                 case 'Player':                                                           
                     display.drawTriangle(object);     
@@ -53,26 +55,23 @@ window.addEventListener("load", function(event) {
                 default:
                     console.log(object.tag + " :has no shape")
             } 
-            
-              
         }
 
         display.render();  
     };
   
-    let update = function() {           
-      
+    let update = function() {   
          
         // Player Controls
         if (controller.left.active)  { game.world.player.moveLeft();}
         if (controller.right.active) { game.world.player.moveRight(); }
         if (controller.up.active)    { game.world.player.forward();  }
-        if (controller.debug.active) { display.debug = false;  }
-
+        if (controller.pause.active) { controller.paused = !paused}
+        
              
         // Remove gameobjects
-        if(game.instance.gameEngine.gameEngine.to_be_removed.length > 0){
-            for(let sub of game.instance.gameEngine.gameEngine.to_be_removed){   
+        if(game.instance.gameEngine.gameEngine.toBeRemoved.length > 0){
+            for(let sub of game.instance.gameEngine.gameEngine.toBeRemoved){   
                 let object = sub;                
                 
                 if(object !== undefined){
@@ -84,17 +83,18 @@ window.addEventListener("load", function(event) {
                         object.height
                     );
 
-                    game.instance.gameEngine.gameEngine.to_be_removed.delete(object);
+                    game.instance.gameEngine.gameEngine.toBeRemoved.delete(object);
                 }
             }
         }
 
-        game.update();           
-        
+        if(!controller.paused){
+            game.update();           
+        }
         
       
     };
-
+   
     let resize = function(event) {
 
       display.resize(
@@ -105,8 +105,6 @@ window.addEventListener("load", function(event) {
       display.render();
 
     };
-
-    
   
     // Initialize Components  
     
@@ -116,6 +114,7 @@ window.addEventListener("load", function(event) {
     let engine = new Engine(1000/FPS, render, update);        
     /* The game will hold our game logic. */
     let game = new Game(engine);
+    /* The collision */
     /* The display handles window resizing, as well as the on screen canvas. */
     let display = new Display(document.querySelector("canvas"), game);
      
@@ -128,7 +127,7 @@ window.addEventListener("load", function(event) {
     window.addEventListener("resize",  resize);
     window.addEventListener("keydown", keyDownUp);
     window.addEventListener("keyup",   keyDownUp); 
-
+    
     resize(); 
 
     engine.start();        

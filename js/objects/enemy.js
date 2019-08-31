@@ -2,7 +2,7 @@ const Enemy = function(game, x, y) {
 
     this.tag        = "Enemy";
     this.tagNr      = Math.random();
-    this.color      = "#00ff80";
+    this.color      = "rgb(0,255,128)";
     this.width      = ENEMY_WIDTH;   
     this.height     = ENEMY_HEIGHT;   
     this.velocity_x = Math.random() * ENEMY_SPEED / FPS;
@@ -25,22 +25,7 @@ const Enemy = function(game, x, y) {
     constructor : Enemy,   
     explodeTime: EXPLODE_TIME,
     lastShot: 0,
-    fireRate: FIRE_RATE,   
-    messages:[
-      "You better run!",
-      "Imma gonna get ya",
-      "I got a bad feeling about this",
-      "Don't get cocky",
-      "Kamehameha",
-      "Do you know Wisekrakr?",
-      "I'm Batman!",
-      "Weehoo!"
-    ], 
-    currentMessage:null, 
-
-    pickMessage: function(){      
-        return this.messages[Math.floor(Math.random() * this.messages.length)];         
-    },
+    fireRate: FIRE_RATE,
     
     // Function to move towards the player when in range 
     rotateToPlayer: function(){
@@ -78,6 +63,7 @@ const Enemy = function(game, x, y) {
     // Function that handles creating lasers and shooting towards the player,
     // with a certain fire rate
     shootLaser: function(){
+      
       // Create laser object and fire it      
       let time = this.game.instance.spaceEngine.clock/1000;
 
@@ -85,12 +71,8 @@ const Enemy = function(game, x, y) {
         this.lastShot = time;
       }      
  
-      if(this.canShoot){        
-
-        if(this.currentMessage === null){
-          this.currentMessage = this.pickMessage();
-        }
-        this.game.world.messenger(this.currentMessage, this);
+      if(this.canShoot){       
+        
         if(time - this.lastShot >= this.fireRate){
 
           new Laser(
@@ -109,7 +91,8 @@ const Enemy = function(game, x, y) {
     // Check if there is a collision
     collide: function () {       
       if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player){            
+          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
+          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Meteor){            
             return true;
       }    
       return false;         

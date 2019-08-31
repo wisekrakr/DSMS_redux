@@ -2,12 +2,12 @@ const Meteor = function(game,x, y) {
 
     this.tag        = "Meteor";
     this.tagNr      = Math.random();
-    this.color      = "#e3e3e3";
+    this.color      = "rgb(180,230,245,0.2)";
     this.width      = AS_WIDTH/4;    
     this.height     = AS_HEIGHT/4; 
     this.velocity_x = Math.random() * (AS_SPEED * 4) / FPS;
     this.velocity_y = Math.random() * (AS_SPEED * 4) / FPS;
-    this.angle      = 0;
+    this.angle      = Math.random();
     this.speed      = AS_SPEED * 4;       
     this.x          = x;
     this.y          = y;
@@ -25,43 +25,32 @@ const Meteor = function(game,x, y) {
 
 Meteor.prototype = {
 
-    constructor : Meteor,    
+    constructor : Meteor,  
+    collidedWith:null,  
 
     collide: function () {       
-        return this.game.instance.gameEngine.gameEngine.collision(this);         
-    },
+        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
+          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
+          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser){   
+              
+            this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
 
-    compareAngles: function(sourceAngle, otherAngle){
-
-        // sourceAngle and otherAngle should be in the range -3 to 3
-        let difference = otherAngle - sourceAngle;
-
-        if(difference < -1){difference += 3;}            
-        if(difference > 1){difference -= 3;}          
-
-        if(difference > 0){return 1;}           
-        if(difference < 0){return -1;}
-
-        return 0;
+            return true;
+      }    
+      return false;      
     },
    
     update: function() {
          
         if(this.collide()){
-            let attackAngle = this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this, 
-                this.game.instance.gameEngine.gameEngine.collisionObject(this));
-            
-            let dodgeAngle = this.compareAngles(this.angle, attackAngle);
-        
-            this.x += this.speed * Math.cos(-dodgeAngle) / this.game.world.fps; 
-            this.y += this.speed * Math.sin(-dodgeAngle) / this.game.world.fps;  
-                
-        }else{
-            //Set the appropriate speed and direction
-            this.x += this.velocity_x; 
-            this.y += this.velocity_y; 
+            this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this, this.collidedWith);
+
+            this.velocity_x = -this.velocity_x;
+            this.velocity_y = -this.velocity_y;  
         }
         
+        this.x += this.velocity_x * Math.cos(this.angle); 
+        this.y += this.velocity_y * Math.sin(this.angle); 
     },    
 
 };  

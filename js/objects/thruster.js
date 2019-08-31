@@ -17,9 +17,9 @@ Thruster.prototype = {
 
   constructor : Thruster,
   various_colors: [
-   '#ff0000', //red
-    '#ff9900',  //orange
-    '#ffff66' //yellow
+   'rgb(255,0,0)', //red
+    'rgb(255,153,0)',  //orange
+    'rgb(255,255,102)' //yellow
   ],
 
   update: function() {
@@ -32,17 +32,9 @@ Thruster.prototype = {
       }else{
         this.game.instance.gameEngine.gameEngine.removeObject(this);
       }
-
-   
   },    
-  
-
 };  
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
-}
-    
-    
-  
- 
+}    

@@ -2,7 +2,7 @@ const Asteroid = function(game,x, y, w, h) {
 
     this.tag        = "Asteroid";
     this.tagNr      = Math.random();
-    this.color      = "#ffffff";
+    this.color      = "rgba(255,255,255,0.3)";
     this.width      = w;    
     this.height     = h;   
     this.velocity_x = Math.random() * AS_SPEED / FPS *(Math.random() < 0.5 ? 1 : -1);

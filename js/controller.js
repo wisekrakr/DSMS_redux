@@ -7,8 +7,9 @@ const Controller = function() {
     
     this.left  = new Controller.ButtonInput();
     this.right = new Controller.ButtonInput();
-    this.up    = new Controller.ButtonInput();
-    this.debug = new Controller.ButtonInput();
+    this.up    = new Controller.ButtonInput();   
+    this.pause = new Controller.ButtonInput();
+    this.paused= false;
   
     this.keyDownUp = function(type, key_code) {
   
@@ -25,22 +26,19 @@ const Controller = function() {
         case 68: case 39:
             this.right.getInput(down); 
             break;   
-        case 8: //backspace to set debug lines or not
-            this.debug.getInput(down); 
-            break;    
+        case 80: //P to pause game
             
+            if(!this.paused){
+                this.paused = true;
+            }else if(this.paused){
+                this.paused = false;
+            }
+            break;                
         default:
             console.error(key_code + ": This key is not yet defined")     
       }
     }; 
 
-    this.mouseMoveHandler = function(x, y){
-        let mouseX = mouse.clientX;
-        let mouseY = mouse.clientY;
-
-        x = mouseX;
-        y = mouseY;
-    };
   
 };
 

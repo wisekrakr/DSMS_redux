@@ -5,23 +5,14 @@ drawing colors to the buffer and then to the display. */
 
 const Display = function(canvas, game) {
 
-  const debug = true;  
-  
   this.buffer  = document.createElement("canvas").getContext("2d");
   this.context = canvas.getContext("2d");
   this.game    = game;
 
   let messageTime = 0;
-  let alpha = 1.0;
-  
-  // Drawing text on screen
-  // this.drawText = function(text, x, y){
-  
-  //   this.buffer.fillStyle = "rgba(255, 255, 255 " + textAlpha + ")";
-  //   this.buffer.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
-  //   this.buffer.fillText(text, x, y);
-  //   textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);    
-  // }
+  let counter = 0;
+
+  this.buffer.fillStyle = "#e3e3e3";
 
   // Drawing objects with four sides
   this.drawRectangle = function(object) {
@@ -84,20 +75,6 @@ const Display = function(canvas, game) {
 
   };
   
-  this.debugBounds = function(object){
-    if(debug){
-      this.buffer.strokeStyle = "#3efffa";
-      this.buffer.beginPath();
-
-      if(object.tag === "Enemy"){
-        this.buffer.arc(object.x + object.width/2, object.y + object.height/2, object.height, 0, Math.PI * 2, false);
-      }else{        
-        this.buffer.arc(object.x, object.y, object.height * 2, 0, Math.PI * 2, false);        
-      }
-      this.buffer.stroke();
-    }
-  };
-  
   this.drawCircle = function(object){
     this.buffer.fillStyle = object.color;
     this.buffer.beginPath();
@@ -112,154 +89,126 @@ const Display = function(canvas, game) {
 
   };
 
-  // Shows Time on screen
-  this.showTime = function(delta){
-
+  /**
+   * Shows Game info when player is not null
+   */
+  this.showGameInfo = function(){
     this.buffer.fillStyle = "#e3e3e3";
-    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE*1.5 + "px dejavu sans mono";
+    this.buffer.textAlign = 'left';
+    
+    //Display time
     this.buffer.fillText(
-      "Time: " + delta, 
+      "Time: " + Math.round(this.game.world.timeKeeper), 
       30, this.game.world.height - 90
       );
-  }
 
-  // Shows the percentage that is left for the player
-  this.showPlayerLive = function(){
-    
-    this.buffer.fillStyle = "#e3e3e3";
-    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
+    //Display Live left
     this.buffer.fillText(
       "Live: " + Math.round(this.game.world.player.live), 
-      30, this.game.world.height - 70
-      );    
-  }
+      30, this.game.world.height - 65
+      ); 
 
-  // Shows Score on the screen
-  this.showScore = function(){
-    this.buffer.fillStyle = "#e3e3e3";
-    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
+    //Display current score
     this.buffer.fillText(
       "Score: " + Math.round(this.game.world.score), 
-      30, this.game.world.height - 50
-    );
+      30, this.game.world.height - 40
+      );
   }
 
-  // Shows High Score on the screen
-  this.showHighScore = function(){
+  /**
+   * Shows High Score
+   */
+  this.showHighScore = function(){    
     
-    this.buffer.fillStyle = "#ffffff";
     this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px dejavu sans mono";
+    this.buffer.textAlign = 'center';
     this.buffer.fillText(
       "High Score: " + Math.round(localStorage.getItem(WISE_HIGH_SCORES)), 
-      this.game.world.width/3, 50
+      this.game.world.width/2, 50      
     );
   }
 
-  // Shows Game Over text
-  this.showGameOver = function(){
-    
-    this.buffer.fillStyle = "#ffffff";
+  /**
+   * Shows Game over text and time of death
+   */
+  this.showGameOver = function(){    
+    this.buffer.fillStyle = "#e3e3e3";
     this.buffer.font = "small-caps bold " + TEXT_SIZE*4 + "px dejavu sans mono";
+    this.buffer.textAlign = 'center';
+
+    // Displays Game over text
     this.buffer.fillText(
       "GAME OVER", 
-      this.game.world.width/4, this.game.world.height/2
-      );
-    
+      this.game.world.width/2, this.game.world.height/2
+      );   
   }  
 
-  //Show Death time
-  this.showDeathTime = function(){
-    this.buffer.fillStyle = "#ffffff";
-    this.buffer.font = "small-caps bold " + TEXT_SIZE + "px dejavu sans mono";
-    this.buffer.fillText(
-      "Continue: " + Math.round(this.game.world.deathTime), 
-      30, this.game.world.height - 70
-    );
-  }
-  
-
+  /**
+   * Render the canvas and all the text.
+   */
   this.render = function() { 
-
-    // The time spend in this game. Not total play time.
-    let time = Math.round(this.game.world.timeKeeper);
+    
     // Clock to get the total time running
     let clock = (this.game.instance.spaceEngine.clock/1000); 
 
-    // GUI
-    if(this.game.world.player !== null){
+    // All in game text
+    if(this.game.world.player !== null){     
       if(this.game.world.player.live > 0){
-        // Show Time on screen
-        this.showTime(time);
-        // Show Player Live percentage on screen
-        this.showPlayerLive();
-        // Show score on screen
-        this.showScore();
-        // Show High Score on screen
+
+        counter = 0; // reset respawn counter
+        
+        // Show Game Info on left botton of the screen
+        this.showGameInfo();
+        // Show High Score in the center top of the screen
         this.showHighScore();
 
-        alpha = 1.0;
       }else{
-        // Shows Game over text
-       
-        if(alpha > 0){
-         
-          this.showGameOver();
-          alpha -= (1.0 / TEXT_FADE_TIME / this.game.world.fps);            
-        }
 
-        this.buffer.fillStyle = "#ffffff";
-        this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px dejavu sans mono";
+        // Shows Game over text          
+        this.showGameOver();  
+        
+        if(counter === 0){         
+          counter = clock;       
+        }
+       
+        // Displays Continue counter
         this.buffer.fillText(
-          "Continue: " + Math.round(RESPAWN_TIME - alpha * -this.game.world.fps/10 - 7), 
-          this.game.world.width/4, this.game.world.height/4
-        );
+          "Continue: " + Math.round(RESPAWN_TIME - (clock - counter)), 
+          this.game.world.width/2, this.game.world.height/3.5
+        );        
       }
     }
-
 
     // Game messages 
-    let textAlpha =  this.game.world.textAlpha;
-   
-    if(textAlpha > 0){
-      if(this.game.world.sendMessage){    
-              
-        this.buffer.fillStyle = "rgba(168,207,254 " + textAlpha + ")";
-        this.buffer.font = "small-caps bold " + TEXT_SIZE + "px arial sans mono";
+  
+    if(this.game.world.sendMessage){    
+            
+      this.buffer.fillStyle = "rgba(168,207,254)";
+      this.buffer.font = "small-caps bold " + TEXT_SIZE + "px arial sans mono";
+      this.buffer.textAlign = 'center';
 
-        if(!(this.game.world.textObject instanceof Player)){
-          this.buffer.fillText(
-            this.game.world.text, 
-            this.game.world.textObject.x - ((this.game.world.textObject.width * 4) /2) + this.game.world.textObject.width/2, 
-            this.game.world.textObject.y - 35,
-            this.game.world.textObject.width * 4
-          );
-        }else{
-          this.buffer.fillText(
-            this.game.world.text, 
-            this.game.world.textObject.x - ((this.game.world.textObject.width * 8) /2) + this.game.world.textObject.width/2, 
-            this.game.world.textObject.y - 35,
-            this.game.world.textObject.width * 8
-          );
-        }
+      // Messages given by objects are placed above them.
+      this.buffer.fillText(
+        this.game.world.text, 
+        this.game.world.textObject.x, 
+        this.game.world.textObject.y - this.game.world.textObject.height/2,
+      );
 
-        
+      if(messageTime === 0){
+        messageTime = clock 
+      }      
 
-        if(messageTime === 0){
-          messageTime = clock     
-        }      
-
-        if(clock - messageTime >= MESSAGE_TIME){
-          this.game.world.sendMessage = false;
-        
-          messageTime = 0;        
-        }
-        
-      }
-      textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);     
-    }else{
+      // After 3 seconds the message will vanish
+      if(clock - messageTime >= MESSAGE_TIME){
+        this.game.world.sendMessage = false;
       
+        messageTime = 0;        
+      }        
     }
-       
+
+
+    // Drawing the canvas (...last so that the rest gets placed on top)
     this.context.drawImage(
       this.buffer.canvas, 
       0, 0, 
@@ -267,10 +216,17 @@ const Display = function(canvas, game) {
       0, 0, 
       this.context.canvas.width, this.context.canvas.height
     ); 
-
-    
   };
 
+
+ 
+  /**
+   * Live resizing of the canvas (apply in main.js)
+   * 
+   * @param  {} width of the canvas
+   * @param  {} height of the canvas
+   * @param  {} height_width_ratio for the canvas
+   */
   this.resize = function(width, height, height_width_ratio) {
 
     if (height / width > height_width_ratio) {
@@ -282,9 +238,7 @@ const Display = function(canvas, game) {
     }
 
     this.context.imageSmoothingEnabled = false;
-
   };
-
 };
 
 Display.prototype = {

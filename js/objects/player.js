@@ -2,14 +2,14 @@ const Player = function(game) {
 
   this.tag        = "Player";
   this.tagNr      = Math.random();
-  this.color      = "#ff4d00";
+  this.color      = "rgb(255,77,0)";
   this.width      = PLAYER_WIDTH;
   this.height     = PLAYER_HEIGHT;
   this.x          = CENTER_X;
   this.y          = CENTER_Y;
   this.angle      = 0;
   this.speed      = PLAYER_SPEED;
-  this.turnSpeed  = PLAYER_TURN_SPEED;
+  this.rotateSpeed= PLAYER_ROTATE_SPEED;
   this.rotation   = 90 / 180 * Math.PI;  
   this.velocity_x = 0;
   this.velocity_y = 0;
@@ -27,19 +27,21 @@ Player.prototype = {
 
   constructor : Player,
   explodeTime : EXPLODE_TIME,
-  blinkTime : Math.ceil(BLINK_TIME * FPS),
-  blinkNum : Math.ceil(INVUL_TIME / BLINK_TIME),
-  invul_colors: [ 
-    '#00ffff', //cyan
-    '#daa520' //gold
+  blinkTime : Math.ceil(BLINK_TIME * FPS), // Time the player blinks when invulnerable  
+  invul_colors: [ // Player colors when invulnerable
+    'rgb(0,255,255)', //cyan
+    'rgb(218,165,32)' //gold
   ],
   collidedWith: null,
  
   forward:function() { this.acc = true;}, 
-  moveLeft:function()  { this.rotation = this.turnSpeed /180 * Math.PI / this.game.world.fps; },
-  moveRight:function() { this.rotation = -this.turnSpeed /180 * Math.PI / this.game.world.fps; },
+  moveLeft:function()  { this.rotation = this.rotateSpeed /180 * Math.PI / this.game.world.fps; },
+  moveRight:function() { this.rotation = -this.rotateSpeed /180 * Math.PI / this.game.world.fps; },
 
 
+  /**
+   * If the player collides this will return true and also sets a collision object
+   */
   collide: function () {
        
     if(!this.invul){
@@ -54,36 +56,41 @@ Player.prototype = {
     }
     return false;
      
-  }, 
-
+  },   
   
-
+  /**
+   * If the player gets hit it will be invulnerable and blink for a couple of seconds (blinkTime)
+   */
   invulnerable: function(){
-    if(this.invul){     
-
-      if(this.blinkNum > 0){
+    if(this.invul){         
         
-        this.blinkTime--;       
-        this.color = this.game.colorPicker(this.invul_colors);          
+      this.blinkTime--;       
+      this.color = this.game.colorPicker(this.invul_colors);  
+      this.game.world.messenger("Still Alive!!!", this);        
 
-        if(this.blinkTime === 0){
+      if(this.blinkTime === 0){
 
-          this.color      = "#ff4d00";
-          this.blinkTime = Math.ceil(BLINK_TIME * FPS);
-          this.blinkNum = Math.ceil(INVUL_TIME / BLINK_TIME);
-          this.invul = false;
-        }
-      }  
+        this.color      = "rgb(255,77,0)";
+        this.blinkTime = Math.ceil(BLINK_TIME * FPS);
+        this.blinkNum = Math.ceil(INVUL_TIME / BLINK_TIME);
+        this.invul = false;
+      }       
     }
-  },
+  },  
   
+  /**
+   * Function to subtract damage taken from live (health percentage)
+   */
   subtractFromLive: function(){
     let damage = (this.collidedWith.width + this.collidedWith.height) / 2;
 
     this.live -= damage;  
   },
 
-  update:function() {   
+  /**
+   * Updates the player's movement, thruster, invulnerability and exploding
+   */
+  update:function() {       
     
     // As long as the player has live
 

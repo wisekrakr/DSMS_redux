@@ -1,23 +1,23 @@
-/* David Damian 15/08/2019 */
+/* David Damian (wisekrakr) 15/08/2019 */
 
-/* This is a fixed clock step game loop. It can be used for any game and will ensure
-that game state is updated at the same rate across different devices which is important
-for uniform gameplay. You can do things like frame dropping
-and interpolation with a fixed step loop */
+/**
+ * This is a fixed clock step game loop. It will make sure
+ * that the game is updated at a consistent rate. The same experience for all users.
+ * */  
 
 const Engine = function(delta, update, render) {
-
-    this.elapsedTime = 0;// Amount of clock that's accumulated since the last update.
-    this.animationFrameRequest = undefined,// reference to the AFR
-    this.clock = undefined,// The most recent timestamp of loop execution.
-    this.delta = delta,// 1000/30 = 30 frames per second
+    
+    this.animationFrameRequest = undefined,// reference to the Animation Frame Request
+    this.elapsedTime = 0; // Amount of clock that's accumulated since the last update.
+    this.clock = undefined, // The most recent timestamp of loop execution.
+    this.delta = delta, // 1000/30 = 30 frames per second
   
     this.updated = false;// Whether or not the update function has been called since the last cycle.
   
     this.update = update; // The update function
     this.render = render; // The render function
   
-    this.run = function(time) {// This is one cycle of the game loop
+    this.run = function(time) { // This is one cycle of the game loop
 
       this.animationFrameRequest = window.requestAnimationFrame(this.handleRun);
   
@@ -32,7 +32,7 @@ const Engine = function(delta, update, render) {
       };
 
    
-      /* See if enough has passed to update.  */
+      /* See if enough time has passed to update.  */
       while(this.elapsedTime >= this.delta) {
   
         this.elapsedTime -= this.delta;
