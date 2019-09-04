@@ -1,3 +1,9 @@
+/**
+ * Controllable object that needs can't shoot, but has to dodge incoming projectiles
+ * 
+ * @param  {} game Holds the game world. Creates a new instance of the Game Engine
+ */
+
 const Player = function(game) {
 
   this.tag        = "Player";
@@ -33,6 +39,8 @@ Player.prototype = {
     'rgb(218,165,32)' //gold
   ],
   collidedWith: null,
+  myMessages:[], 
+  sendMessage:false,
  
   forward:function() { this.acc = true;}, 
   moveLeft:function()  { this.rotation = this.rotateSpeed /180 * Math.PI / this.game.world.fps; },
@@ -66,8 +74,7 @@ Player.prototype = {
         
       this.blinkTime--;       
       this.color = this.game.colorPicker(this.invul_colors);  
-      this.game.world.messenger("Still Alive!!!", this);        
-
+      
       if(this.blinkTime === 0){
 
         this.color      = "rgb(255,77,0)";
@@ -108,6 +115,7 @@ Player.prototype = {
           this.velocity_y += this.speed * Math.sin(this.angle) / this.game.world.fps;
           
           this.thruster.color = this.game.colorPicker(this.thruster.various_colors);
+          this.game.instance.gameEngine.gameEngine.explode(this.thruster, this.game, 2);
 
           this.acc = false;
         }else{
@@ -133,15 +141,14 @@ Player.prototype = {
         // Substract live from the player
         this.subtractFromLive();
 
-        // Explode animation (creating debris)
-        if(this.explodeTime > 0){
-          this.game.instance.gameEngine.gameEngine.explode(this, this.game);
-
-          this.explodeTime--;      
-          
-          // Start the invulnerable period.
-          this.invul = true;
-        }
+        // Explode animation (creating debris)        
+        this.game.instance.gameEngine.gameEngine.explode(this, this.game, 5);
+        
+        if(!this.sendMessage){
+            this.game.world.messenger("Don't Shoot My Spaceship!",this);             
+        }           
+        // Start the invulnerable period.
+        this.invul = true;        
       }
 
       // Period of invulnerability after death

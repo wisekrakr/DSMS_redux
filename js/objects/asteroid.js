@@ -1,3 +1,10 @@
+/**
+ * @param  {} game Holds the game world. Creates a new instance of the Game Engine
+ * @param  {} x position on x-axis
+ * @param  {} y position on y-axis
+ * @param  {} w width in pixels
+ * @param  {} h height in pixels
+ */
 const Asteroid = function(game,x, y, w, h) {
 
     this.tag        = "Asteroid";
@@ -30,6 +37,9 @@ Asteroid.prototype = {
     explodeTime: EXPLODE_TIME,
     collidedWith: null,
 
+    /**
+     * If the Asteroid collides: this will return true and also sets a collision object
+     */
     collide: function () {       
         if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
             this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
@@ -43,17 +53,14 @@ Asteroid.prototype = {
         return false;         
     },
     
-   
+    /**
+     * Updates the asteroid's movement and exploding
+     */
     update: function() {
          
         if(this.collide()){
-            //Check what kind of object and either explode or blow in pieces        
-
-            if(this.explodeTime > 0){
-                this.game.instance.gameEngine.gameEngine.explode(this, this.game);
-
-                this.explodeTime--;    
-            }
+            //Check what kind of object and either explode or blow in pieces   
+            this.game.instance.gameEngine.gameEngine.explode(this, this.game, 5);
 
         }else{
              //Set the appropriate speed and direction 

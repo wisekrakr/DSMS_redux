@@ -1,14 +1,14 @@
-/* David Damian 15/08/2019 */
 
-/* The controller only alerts the user whenever they press a key,
-but it also defines the ButtonInput class, which is used for tracking button states. */
+/**
+ * The controller only alerts the user whenever they press a key,
+ * but it also defines the ButtonInput class, which is used for tracking button states.
+ */
 
 const Controller = function() {
     
     this.left  = new Controller.ButtonInput();
     this.right = new Controller.ButtonInput();
     this.up    = new Controller.ButtonInput();   
-    this.pause = new Controller.ButtonInput();
     this.paused= false;
   
     this.keyDownUp = function(type, key_code) {
@@ -17,27 +17,27 @@ const Controller = function() {
       
       switch(key_code) {
         
-        case 65: case 37: 
+        case 65: case 37: //A and Left Arrow
             this.left.getInput(down);  
             break;
-        case 87: case 38:
+        case 87: case 38: //W and Up Arrow
             this.up.getInput(down);    
             break;
-        case 68: case 39:
+        case 68: case 39: //D and Right Arrow
             this.right.getInput(down); 
-            break;   
-        case 80: //P to pause game
-            
-            if(!this.paused){
-                this.paused = true;
-            }else if(this.paused){
-                this.paused = false;
-            }
-            break;                
+            break;  
+        case 80:     // P to pause        
+            this.paused = true;            
+            break;
+        case 27:  // Escape to unpause
+            this.paused = false;
+            break;
         default:
             console.error(key_code + ": This key is not yet defined")     
       }
     }; 
+
+
 
   
 };

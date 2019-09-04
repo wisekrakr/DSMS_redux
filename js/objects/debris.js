@@ -1,3 +1,14 @@
+/**
+ * Simulates particles during explosions of objects.
+ * 
+ * @param  {} game Holds the game world. Creates a new instance of the Game Engine
+ * @param  {} x position on x-axis
+ * @param  {} y position on y-axis
+ * @param  {} w width in pixels
+ * @param  {} h height in pixels
+ * @param  {} color coloring for the object
+ */
+
 const Debris = function(game, x, y, w, h, color) {
     
     this.tag        = "Debris";
@@ -19,6 +30,9 @@ Debris.prototype = {
 
   constructor : Debris,  
 
+  /**
+   * Update debris movement and remove from display after 2 seconds
+   */
   update: function() {
 
     this.x += this.velocity_x * Math.cos(this.angle); 

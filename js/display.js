@@ -12,8 +12,6 @@ const Display = function(canvas, game) {
   let messageTime = 0;
   let counter = 0;
 
-  this.buffer.fillStyle = "#e3e3e3";
-
   // Drawing objects with four sides
   this.drawRectangle = function(object) {
 
@@ -75,11 +73,18 @@ const Display = function(canvas, game) {
 
   };
   
-  this.drawCircle = function(object){
-    this.buffer.fillStyle = object.color;
-    this.buffer.beginPath();
-    this.buffer.arc(object.x, object.y, object.height, 0, Math.PI * 2, false); 
-    this.buffer.fill();
+  this.drawCircle = function(object, filled){
+    if(filled){
+      this.buffer.fillStyle = object.color;
+      this.buffer.beginPath();
+      this.buffer.arc(object.x, object.y, object.height, 0, Math.PI * 2, false); 
+      this.buffer.fill();
+    }else{
+      this.buffer.strokeStyle = object.color;
+      this.buffer.beginPath();
+      this.buffer.arc(object.x, object.y, object.height, 0, Math.PI * 2, false); 
+      this.buffer.stroke();
+    }
   }
 
   this.fill = function(color) {
@@ -93,27 +98,62 @@ const Display = function(canvas, game) {
    * Shows Game info when player is not null
    */
   this.showGameInfo = function(){
-    this.buffer.fillStyle = "#e3e3e3";
-    this.buffer.font = "small-caps bold " + TEXT_SIZE*1.5 + "px dejavu sans mono";
+    this.buffer.fillStyle = "#FFA500";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE*1.5 + "px gamer";
     this.buffer.textAlign = 'left';
+
+    let live = this.game.world.player.live;
+    let score = this.game.world.score;
     
     //Display time
     this.buffer.fillText(
       "Time: " + Math.round(this.game.world.timeKeeper), 
-      30, this.game.world.height - 90
-      );
-
-    //Display Live left
+      30, this.game.world.height - 65,
+      150);
+    
+    //Display Live left  
+    
     this.buffer.fillText(
-      "Live: " + Math.round(this.game.world.player.live), 
-      30, this.game.world.height - 65
+      "Live: " + Math.round(live), 
+      30, this.game.world.height - 45,
+      150);     
+
+    //Display current score    
+    this.buffer.fillText(
+      "Score: " + Math.round(score), 
+      30, this.game.world.height - 25,
+      150);
+
+    // When a time trail initiates and the Player escorts the Froggy around, keeping it alive,
+    // a timer start going for extra points
+    // On top of the rest.
+    if(this.game.world.froggy !== null){
+      if(this.game.world.froggy.following){  
+
+        this.buffer.fillText(
+          "Time Trial: " + Math.round(this.game.world.timeTrial), 
+          30, this.game.world.height - 90,
+          150
+        );           
+      }
+
+      this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px gamer";        
+
+      this.buffer.fillText(
+        "Time Trial Best: " + Math.round(this.game.world.timeTrialHigh) + " seconds", 
+        30, 45,
+        250
       ); 
-
-    //Display current score
-    this.buffer.fillText(
-      "Score: " + Math.round(this.game.world.score), 
-      30, this.game.world.height - 40
-      );
+      
+      if(this.game.world.froggy.explodeTime <= 0){
+        this.buffer.fillText(
+          "Froggy died... R.I.P. Froggy", 
+          30, 70,
+          250
+        ); 
+      }
+    }  
+    
   }
 
   /**
@@ -121,10 +161,10 @@ const Display = function(canvas, game) {
    */
   this.showHighScore = function(){    
     
-    this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px dejavu sans mono";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE*4 + "px gamer";
     this.buffer.textAlign = 'center';
     this.buffer.fillText(
-      "High Score: " + Math.round(localStorage.getItem(WISE_HIGH_SCORES)), 
+      "High Score: " + Math.round(localStorage.getItem(DSMS_HIGH_SCORES)), 
       this.game.world.width/2, 50      
     );
   }
@@ -134,7 +174,7 @@ const Display = function(canvas, game) {
    */
   this.showGameOver = function(){    
     this.buffer.fillStyle = "#e3e3e3";
-    this.buffer.font = "small-caps bold " + TEXT_SIZE*4 + "px dejavu sans mono";
+    this.buffer.font = "small-caps bold " + TEXT_SIZE*6 + "px gamer";
     this.buffer.textAlign = 'center';
 
     // Displays Game over text
@@ -161,7 +201,7 @@ const Display = function(canvas, game) {
         // Show Game Info on left botton of the screen
         this.showGameInfo();
         // Show High Score in the center top of the screen
-        this.showHighScore();
+        this.showHighScore();    
 
       }else{
 
@@ -172,7 +212,8 @@ const Display = function(canvas, game) {
           counter = clock;       
         }
        
-        // Displays Continue counter
+        // Displays Continue counter       
+
         this.buffer.fillText(
           "Continue: " + Math.round(RESPAWN_TIME - (clock - counter)), 
           this.game.world.width/2, this.game.world.height/3.5
@@ -180,33 +221,52 @@ const Display = function(canvas, game) {
       }
     }
 
+
     // Game messages 
-  
-    if(this.game.world.sendMessage){    
-            
-      this.buffer.fillStyle = "rgba(168,207,254)";
-      this.buffer.font = "small-caps bold " + TEXT_SIZE + "px arial sans mono";
-      this.buffer.textAlign = 'center';
+    
+    this.buffer.textAlign = 'center';
 
-      // Messages given by objects are placed above them.
-      this.buffer.fillText(
-        this.game.world.text, 
-        this.game.world.textObject.x, 
-        this.game.world.textObject.y - this.game.world.textObject.height/2,
-      );
-
-      if(messageTime === 0){
-        messageTime = clock 
-      }      
-
-      // After 3 seconds the message will vanish
-      if(clock - messageTime >= MESSAGE_TIME){
-        this.game.world.sendMessage = false;
+    // Messages given by objects are placed above them.
+    for(let [message, object] of this.game.world.messages){ 
       
-        messageTime = 0;        
-      }        
-    }
+      // If the object is not on display, don't show its message
+      if(!this.game.instance.gameEngine.gameEngine.toBeRemoved.has(object)){
 
+        if(message !== null){
+
+          if(object instanceof WorldMessage){
+
+            var gradient = this.buffer.createLinearGradient(0, 0, this.game.world.width, 0);
+
+            gradient.addColorStop("0"," magenta");
+            gradient.addColorStop("0.5", "blue");
+            gradient.addColorStop("1.0", "red");
+           
+            this.buffer.fillStyle = gradient;
+            this.buffer.font = "small-caps bold " + TEXT_SIZE*3 + "px gamer";  
+
+          }else{
+            this.buffer.fillStyle = "rgba(168,207,254)";
+            this.buffer.font = TEXT_SIZE + "px gamer";  
+          }
+          this.buffer.fillText(message, object.x, object.y - object.height/2);
+        }
+
+        if(messageTime === 0){
+          messageTime = clock 
+        }      
+
+        // After 3 seconds the message will vanish
+        if(clock - messageTime >= 3){    
+        
+          this.game.world.messages.delete(message, object); // delete the current message
+
+          object.sendMessage = false; // Now a new message can be received
+
+          messageTime = 0;        
+        } 
+      }       
+    }
 
     // Drawing the canvas (...last so that the rest gets placed on top)
     this.context.drawImage(

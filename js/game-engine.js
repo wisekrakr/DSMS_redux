@@ -58,7 +58,7 @@ const GameEngine = function(){
             let attackDistanceY = object1.y - object2.y;
 
             return Math.atan2(attackDistanceY, attackDistanceX);
-        },        
+        },         
 
         /**
          * Creates an explosion effect by creating debris objects
@@ -66,17 +66,20 @@ const GameEngine = function(){
          * @param  {} object Object that uses this function
          * @param  {} game Current running game
          */
-        explode : function(object, game){
+        explode : function(object, game, bits){
             
-            let debrisParts = [];
-            for (let i = debrisParts.length; i < 5; i++) {      
-                debrisParts[i] = new Debris(game, 
-                    object.x, object.y, 
-                    object.width / i+1, object.height / i+1, 
-                    object.color
-                    );
-     
-            } 
+            if(object !== null && object.explodeTime > 0){
+                let debrisParts = [];
+                for (let i = debrisParts.length; i < bits; i++) {      
+                    debrisParts[i] = new Debris(game, 
+                        object.x, object.y, 
+                        object.width / i+1, object.height / i+1, 
+                        object.color
+                        );
+        
+                } 
+                object.explodeTime--;
+            }
         },  
 
         /**
@@ -115,7 +118,7 @@ const GameEngine = function(){
                 if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
                     
                     if (this.distanceBetweenPoints(object.x, object.y, sub.x, sub.y) < 
-                        object.width/1.75 + sub.width/1.75 && object.height/1.75 + sub.height/1.75) {   
+                        object.width + sub.width && object.height + sub.height) {   
     
                         collisionObject = sub;
                     }

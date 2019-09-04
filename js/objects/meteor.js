@@ -1,14 +1,22 @@
+/**
+ * Meteors only want to give points to the player. So hit them towards the Meteor Goal
+ * 
+ * @param  {} game Holds the game world. Creates a new instance of the Game Engine
+ * @param  {} x position on x-axis
+ * @param  {} y position on y-axis
+ */
+
 const Meteor = function(game,x, y) {
 
     this.tag        = "Meteor";
     this.tagNr      = Math.random();
-    this.color      = "rgb(180,230,245,0.2)";
-    this.width      = AS_WIDTH/4;    
-    this.height     = AS_HEIGHT/4; 
-    this.velocity_x = Math.random() * (AS_SPEED * 4) / FPS;
-    this.velocity_y = Math.random() * (AS_SPEED * 4) / FPS;
+    this.color      = "rgb(180,230,245,0.6)";
+    this.width      = AS_WIDTH/3.3;    
+    this.height     = AS_HEIGHT/3.3; 
+    this.velocity_x = Math.random() * (AS_SPEED * 2) / FPS;
+    this.velocity_y = Math.random() * (AS_SPEED * 2) / FPS;
     this.angle      = Math.random();
-    this.speed      = AS_SPEED * 4;       
+    this.speed      = AS_SPEED * 2;       
     this.x          = x;
     this.y          = y;
     this.vertices   = Math.floor(Math.random() * (VERTICES + 1) + VERTICES /2);
@@ -27,11 +35,17 @@ Meteor.prototype = {
 
     constructor : Meteor,  
     collidedWith:null,  
+    sendMessage:false,
+    explodeTime:EXPLODE_TIME,
 
+    /**
+    * If the meteor collides this will return true and also sets a collision object
+    */
     collide: function () {       
         if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
           this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser){   
+          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser || 
+          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Planet){   
               
             this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
 
@@ -39,23 +53,72 @@ Meteor.prototype = {
       }    
       return false;      
     },
+
+    behavior: function(){
+        for(let target of this.game.instance.gameEngine.gameEngine.gameObjects){    
+          if(target instanceof Planet){           
+  
+            if(this.target !== null){
+              if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < 800){
+  
+                this.angle = this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
+            
+              }
+            }
+          }
+        }
+      },
    
+    /**
+    * Updates the meteor's movement and exploding.  
+    */
     update: function() {
          
+        this.behavior();
+        
         if(this.collide()){
-            this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this, this.collidedWith);
+            // Get destroyed.
+            if(this.collidedWith instanceof Planet){
+                this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
+            }else if(this.collidedWith instanceof Player){
+                this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
 
-            this.velocity_x = -this.velocity_x;
-            this.velocity_y = -this.velocity_y;  
+                this.velocity_x = 0;
+                this.velocity_y = 0;  
+
+                if(!this.sendMessage){
+                    this.game.world.messenger("+100", this);                   
+                }
+            }
+
+            // // Bounce of collided object
+            // else{
+            //     this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,this.collidedWith);
+
+            //     this.velocity_x = -this.velocity_x * AS_SPEED;
+            //     this.velocity_y = -this.velocity_y * AS_SPEED;  
+            // }
+        }else{
+            this.x -= this.velocity_x * Math.cos(this.angle); 
+            this.y -= this.velocity_y * Math.sin(this.angle); 
+
+            let debrisParts = [];
+            for (let i = debrisParts.length; i < 2; i++) {      
+                debrisParts[i] = new Debris(this.game, 
+                    this.x, this.y, 
+                    this.width / i+1, this.height / i+1, 
+                    this.color
+                    );
+    
+            } 
         }
         
-        this.x += this.velocity_x * Math.cos(this.angle); 
-        this.y += this.velocity_y * Math.sin(this.angle); 
+        
     },    
 
 };  
-  
-  
+
+
     
     
   

@@ -1,3 +1,11 @@
+/**
+ * Patrolling the heavens until a player is in its range, then it will follow and shoot
+ * that player. The enemy also dodges asteroids.
+ * 
+ * @param  {} game Holds the game world. Creates a new instance of the Game Engine
+ * @param  {} x position on x-axis
+ * @param  {} y position on y-axis
+ */
 const Enemy = function(game, x, y) {
 
     this.tag        = "Enemy";
@@ -26,29 +34,46 @@ const Enemy = function(game, x, y) {
     explodeTime: EXPLODE_TIME,
     lastShot: 0,
     fireRate: FIRE_RATE,
+    myMessages: [
+      "I will shoot you!",
+      "come BACK here!",
+      "bleep blorp zorg",
+      "shinde kudasai",
+      "amaré tu muerte",
+      "oyisithutha ofile",
+      "ich werde dich erschießen",
+      "lelőlek",
+      "zastrzelę cię",
+      "nitakupiga",
+      "я пристрелю тебя",
+      "ik zal je neerschieten",
+      "ti sparaghju"
+    ],     
+    sendMessage:false,
+       
     
-    // Function to move towards the player when in range 
-    rotateToPlayer: function(){
-      for(let sub of this.game.instance.gameEngine.gameEngine.gameObjects){    
-        if(sub instanceof Player){
-          
-          let target = sub;
+    /**
+     * Function to angle towards the player and away from asteroids, when in range 
+     */
+    behavior: function(){
+      for(let target of this.game.instance.gameEngine.gameEngine.gameObjects){    
+        if(target instanceof Player){     
 
           if(this.target !== null){
-            if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < this.range){
+            if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < this.range &&
+            this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) > target.width * 2){
 
               this.angle = this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
 
               this.canShoot = true;
-
+        
             }else{
 
               this.canShoot = false;
                            
             }
           }
-        }else if(sub instanceof Asteroid){
-          let target = sub;
+        }else if(target instanceof Asteroid){
 
           if(this.target !== null){
             if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < (this.width + target.width) + 20){
@@ -59,9 +84,11 @@ const Enemy = function(game, x, y) {
         }
       }
     },
-
-    // Function that handles creating lasers and shooting towards the player,
-    // with a certain fire rate
+    
+    /**
+     * Function that handles creating lasers and shooting towards the player,
+     * with a certain fire rate
+     */
     shootLaser: function(){
       
       // Create laser object and fire it      
@@ -71,9 +98,9 @@ const Enemy = function(game, x, y) {
         this.lastShot = time;
       }      
  
-      if(this.canShoot){       
-        
-        if(time - this.lastShot >= this.fireRate){
+      if(this.canShoot){   
+          
+        if(time - this.lastShot >= this.fireRate){        
 
           new Laser(
             this.game,
@@ -88,7 +115,9 @@ const Enemy = function(game, x, y) {
       }
     }, 
 
-    // Check if there is a collision
+    /**
+    * If the enemy collides this will return true and also sets a collision object
+    */
     collide: function () {       
       if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid || 
           this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
@@ -98,6 +127,10 @@ const Enemy = function(game, x, y) {
       return false;         
     },
     
+    /**
+    * Updates the enemy's movement and exploding.
+    * Also initializes the rotation and shooting.
+    */
     update: function() {    
       
       if(!this.collide()){
@@ -105,18 +138,17 @@ const Enemy = function(game, x, y) {
         this.x -= this.velocity_x * Math.cos(this.angle);
         this.y -= this.velocity_y * Math.sin(this.angle);
 
-        this.rotateToPlayer(); 
-        this.shootLaser();            
+        this.behavior(); 
+        this.shootLaser();
         
+        //Messaging
+        if(this.canShoot){
+          if(!this.sendMessage){
+            this.game.world.messenger(this.myMessages[Math.floor(Math.random() * this.myMessages.length)], this);           
+          }     
+        }
       }else{
-        
-        if(this.explodeTime > 0){          
-
-          this.game.instance.gameEngine.gameEngine.explode(this, this.game);
-
-          this.explodeTime--;                 
-          
-        }      
+          this.game.instance.gameEngine.gameEngine.explode(this, this.game,5);
       }
     },   
   

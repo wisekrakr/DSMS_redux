@@ -1,3 +1,8 @@
+/**
+ * A thruster for the player. Only used for esthetics
+ * 
+ * @param  {} game Holds the game world. Creates a new instance of the Game Engine
+ */
 const Thruster = function(game) {
 
     this.tag        = "Thruster";
@@ -16,25 +21,31 @@ const Thruster = function(game) {
 Thruster.prototype = {
 
   constructor : Thruster,
+  explodeTime: EXPLODE_TIME/2,
   various_colors: [
    'rgb(255,0,0)', //red
     'rgb(255,153,0)',  //orange
     'rgb(255,255,102)' //yellow
   ],
 
+  /**
+   * Update thruster's movement
+   */
   update: function() {
 
       if(this.game.world.player !== null){
         this.angle = this.game.world.player.angle;
 
         this.x = this.game.world.player.x - this.game.world.player.width * Math.cos(-this.angle); 
-        this.y = this.game.world.player.y + this.game.world.player.height * Math.sin(this.angle);  
+        this.y = this.game.world.player.y + this.game.world.player.height * Math.sin(this.angle);
+        
+        this.explodeTime = EXPLODE_TIME/2;
       }else{
         this.game.instance.gameEngine.gameEngine.removeObject(this);
       }
   },    
 };  
-
+  
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
-}    
+}

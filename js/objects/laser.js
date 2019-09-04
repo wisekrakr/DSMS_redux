@@ -1,3 +1,12 @@
+/**
+ * A bullet that an enemy can shoot towards the player and that does damage.
+ * 
+ * @param  {} game Holds the game world. Creates a new instance of the Game Engine
+ * @param  {} x position on x-axis
+ * @param  {} y position on y-axis
+ * @param  {} parent game object that uses this object
+ */
+
 const Laser = function(game,x, y, a, parent) {
 
     this.tag        = "Laser";
@@ -7,8 +16,7 @@ const Laser = function(game,x, y, a, parent) {
     this.height     = LASER_HEIGHT;   
     this.velocity_x = LASER_SPEED / FPS;
     this.velocity_y = LASER_SPEED / FPS;   
-    this.angle      = a;
-    this.speed      = LASER_SPEED;       
+    this.angle      = a;     
     this.x          = x;
     this.y          = y;
     this.lifeTime   = 1 * FPS;
@@ -22,6 +30,9 @@ Laser.prototype = {
 
     constructor : Laser,    
 
+     /**
+    * If the laser collides this will return true and also sets a collision object
+    */
     collide: function () {       
         if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid ||
             this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player) {
@@ -31,6 +42,10 @@ Laser.prototype = {
         return false;           
     },
    
+    /**
+    * Updates the laser's movement and exploding.
+    * Also removes laser after a certain time to simulate a bullet range
+    */
     update: function() {
 
         this.color = this.game.colorPicker([
@@ -40,11 +55,8 @@ Laser.prototype = {
         ]);
          
         if(this.collide()){
-            if(this.explodeTime > 0){
-                this.game.instance.gameEngine.gameEngine.explode(this, this.game);
-
-                this.explodeTime--;    
-            }
+           
+            this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
                 
         }else{
             //Set the appropriate speed and direction
@@ -56,14 +68,7 @@ Laser.prototype = {
             }else{
                 this.game.instance.gameEngine.gameEngine.removeObject(this);
             }
-        }
-        
-    },    
-
+        }        
+    },   
 };  
-  
-  
-    
-    
-  
  
