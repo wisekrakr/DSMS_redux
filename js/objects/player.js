@@ -4,47 +4,47 @@
  * @param  {} game Holds the game world. Creates a new instance of the Game Engine
  */
 
-const Player = function(game) {
+const Player = function(game,x,y) {
 
   this.tag        = "Player";
-  this.tagNr      = Math.random();
+  this.tag_nr     = Math.random();
   this.color      = "rgb(255,77,0)";
   this.width      = PLAYER_WIDTH;
   this.height     = PLAYER_HEIGHT;
-  this.x          = CENTER_X;
-  this.y          = CENTER_Y;
+  this.init_width = PLAYER_WIDTH;
+  this.init_height= PLAYER_HEIGHT;   
+  this.x          = x;
+  this.y          = y;
   this.angle      = 0;
   this.speed      = PLAYER_SPEED;
-  this.rotateSpeed= PLAYER_ROTATE_SPEED;
+  this.rotate_speed= PLAYER_ROTATE_SPEED;
   this.rotation   = 90 / 180 * Math.PI;  
   this.velocity_x = 0;
   this.velocity_y = 0;
   this.live       = 100;
-  this.acc        = false;  
-  this.thruster   = null; 
+  this.acc        = false;
   this.invul      = false;
   this.game       = game; 
  
   this.game.instance.gameEngine.gameEngine.addObject(this);
-  this.thruster = new Thruster(this.game); 
 };
 
 Player.prototype = {
 
   constructor : Player,
-  explodeTime : EXPLODE_TIME,
-  blinkTime : Math.ceil(BLINK_TIME * FPS), // Time the player blinks when invulnerable  
+  explode_time : EXPLODE_TIME,
+  blink_time : Math.ceil(BLINK_TIME * FPS), // Time the player blinks when invulnerable  
   invul_colors: [ // Player colors when invulnerable
     'rgb(0,255,255)', //cyan
     'rgb(218,165,32)' //gold
   ],
-  collidedWith: null,
-  myMessages:[], 
-  sendMessage:false,
+  collided_with: null,
+  my_messages:[], 
+  send_message:false,
  
   forward:function() { this.acc = true;}, 
-  moveLeft:function()  { this.rotation = this.rotateSpeed /180 * Math.PI / this.game.world.fps; },
-  moveRight:function() { this.rotation = -this.rotateSpeed /180 * Math.PI / this.game.world.fps; },
+  moveLeft:function()  { this.rotation = this.rotate_speed /180 * Math.PI / this.game.world.fps; },
+  moveRight:function() { this.rotation = -this.rotate_speed /180 * Math.PI / this.game.world.fps; },
 
 
   /**
@@ -57,7 +57,7 @@ Player.prototype = {
           this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
           this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser){
 
-          this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+          this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
 
         return true;
       }
@@ -67,37 +67,47 @@ Player.prototype = {
   },   
   
   /**
-   * If the player gets hit it will be invulnerable and blink for a couple of seconds (blinkTime)
+   * If the player gets hit it will be invulnerable and blink for a couple of seconds (blink_time)
    */
   invulnerable: function(){
     if(this.invul){         
         
-      this.blinkTime--;       
+      this.blink_time--;       
       this.color = this.game.colorPicker(this.invul_colors);  
       
-      if(this.blinkTime === 0){
+      if(this.blink_time === 0){
 
-        this.color      = "rgb(255,77,0)";
-        this.blinkTime = Math.ceil(BLINK_TIME * FPS);
-        this.blinkNum = Math.ceil(INVUL_TIME / BLINK_TIME);
+        this.color  = "rgb(255,77,0)";
+        this.blink_time = Math.ceil(BLINK_TIME * FPS);     
         this.invul = false;
       }       
     }
-  },  
+  },   
   
   /**
-   * Function to subtract damage taken from live (health percentage)
+   * Simulates boosting
    */
-  subtractFromLive: function(){
-    let damage = (this.collidedWith.width + this.collidedWith.height) / 2;
+  boosting: function(){
+    let debrisParts = [];
 
-    this.live -= damage;  
+    for (let i = debrisParts.length; i < 2; i++) {      
+        debrisParts[i] = new Debris(this.game, 
+            this.x - this.width * Math.cos(-this.angle), 
+            this.y + this.height * Math.sin(this.angle), 
+            (this.width/3) / i+1, (this.height/3) / i+1, 
+            this.game.colorPicker([
+              'rgb(255,0,0)', //red
+                'rgb(255,153,0)',  //orange
+                'rgb(255,255,102)' //yellow
+              ])
+            );
+    }
   },
-
+  
   /**
-   * Updates the player's movement, thruster, invulnerability and exploding
+   * Updates the player's movement, boosting, invulnerability and exploding
    */
-  update:function() {       
+  update:function() {      
     
     // As long as the player has live
 
@@ -109,13 +119,13 @@ Player.prototype = {
         // Give the player an angle
         this.angle += this.rotation *= this.game.world.friction;     
         
-        // When hitting the Up key, give the player velocity and give the thruster a "on" color.
+        // When hitting the Up key, give the player velocity and give a boosting animation.
         if(this.acc){
           this.velocity_x += this.speed * Math.cos(this.angle) / this.game.world.fps;
           this.velocity_y += this.speed * Math.sin(this.angle) / this.game.world.fps;
-          
-          this.thruster.color = this.game.colorPicker(this.thruster.various_colors);
-          this.game.instance.gameEngine.gameEngine.explode(this.thruster, this.game, 2);
+
+          // Simulates boosting engine
+          this.boosting();
 
           this.acc = false;
         }else{
@@ -123,9 +133,6 @@ Player.prototype = {
 
           this.velocity_x -= this.game.world.friction * this.velocity_x / this.game.world.fps;
           this.velocity_y -= this.game.world.friction * this.velocity_y / this.game.world.fps;
-
-          // Give the thruster a black color to become invisible.
-          this.thruster.color = '#ffffff00';
         }
         
         //Add the velocity to the position for movement.
@@ -139,14 +146,11 @@ Player.prototype = {
         this.velocity_y = 0;    
         
         // Substract live from the player
-        this.subtractFromLive();
+        this.game.instance.gameEngine.gameEngine.subtractFromLive(this);   
 
         // Explode animation (creating debris)        
-        this.game.instance.gameEngine.gameEngine.explode(this, this.game, 5);
-        
-        if(!this.sendMessage){
-            this.game.world.messenger("Don't Shoot My Spaceship!",this);             
-        }           
+        this.game.instance.gameEngine.gameEngine.explode(this, this.game, 5);        
+              
         // Start the invulnerable period.
         this.invul = true;        
       }

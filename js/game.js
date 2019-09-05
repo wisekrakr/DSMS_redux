@@ -37,7 +37,7 @@ const Game = function(engine) {
   this.setAsteroidBelt = function(){  
     let x,y;   
     
-    for(let i = this.world.numberOfAsteroids; i > this.world.asteroids.size; i--){      
+    for(let i = this.world.number_asteroids; i > this.world.asteroids.size; i--){      
       do{
         x = Math.floor(Math.random()* this.world.width);
         y = Math.floor(Math.random()* this.world.height);
@@ -73,7 +73,7 @@ const Game = function(engine) {
   this.setEnemies = function(){  
     let x,y;   
 
-    for(let i = this.world.numberOfEnemies; i > this.world.enemies.size; i--){      
+    for(let i = this.world.number_enemies; i > this.world.enemies.size; i--){      
       do{
         x = Math.floor(Math.random()* this.world.width);
         y = Math.floor(Math.random()* this.world.height);
@@ -92,7 +92,7 @@ const Game = function(engine) {
   this.setMeteorShower = function(){   
     let x,y;   
     
-    for(let i = Math.round(this.world.asteroids.size/2); i > this.world.meteorShower.size; i--){  
+    for(let i = Math.round(this.world.asteroids.size/2); i > this.world.meteor_shower.size; i--){  
       do{
         x = Math.floor(Math.random()* this.world.width);
         y = Math.floor(Math.random()* this.world.height);     
@@ -101,7 +101,7 @@ const Game = function(engine) {
         distanceBetweenPoints(this.world.player.x, this.world.player.y, x,y) < 
         this.world.player.width + 200);
 
-      this.world.meteorShower.add(new Meteor(this, x, y));     
+      this.world.meteor_shower.add(new Meteor(this, x, y));     
     }    
   }, 
 
@@ -125,9 +125,9 @@ const Game = function(engine) {
   this.scoreAndObjectHandler = function(object){    
     
     // Handle exploding objects
-    if(object.tag !== "Thruster" && object.tag !== 'Debris'){             
+    if(object.tag !== 'Debris'){             
       
-      if(object.explodeTime <= 0){   
+      if(object.explode_time <= 0){   
         
         switch(object.tag){
           case "Asteroid":
@@ -147,7 +147,7 @@ const Game = function(engine) {
             this.instance.gameEngine.gameEngine.removeObject(object);    
             break;
           case "Meteor":
-            this.world.meteorShower.delete(object);
+            this.world.meteor_shower.delete(object);
             this.instance.gameEngine.gameEngine.removeObject(object);   
             console.log("removing meteor");
             this.world.score += 100;  
@@ -170,6 +170,13 @@ const Game = function(engine) {
    * when one gets removed.
    */
   this.update = function() {   
+
+    localStorage.setItem(DSMS_HIGH_SCORES, 0);      
+
+    if(this.score > parseInt(localStorage.getItem(DSMS_HIGH_SCORES))){       
+
+        localStorage.setItem(DSMS_HIGH_SCORES, this.world.score);
+    }      
    
     this.world.update();  
     this.instance.gameEngine.update(); 
@@ -182,3 +189,7 @@ const Game = function(engine) {
 };
 
 Game.prototype = { constructor : Game };
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}

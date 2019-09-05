@@ -9,8 +9,9 @@ const Display = function(canvas, game) {
   this.context = canvas.getContext("2d");
   this.game    = game;
 
-  let messageTime = 0;
+  let message_time = 0;
   let counter = 0;
+
 
   // Drawing objects with four sides
   this.drawRectangle = function(object) {
@@ -107,7 +108,7 @@ const Display = function(canvas, game) {
     
     //Display time
     this.buffer.fillText(
-      "Time: " + Math.round(this.game.world.timeKeeper), 
+      "Time: " + Math.round(this.game.world.time_keeper), 
       30, this.game.world.height - 65,
       150);
     
@@ -131,7 +132,7 @@ const Display = function(canvas, game) {
       if(this.game.world.froggy.following){  
 
         this.buffer.fillText(
-          "Time Trial: " + Math.round(this.game.world.timeTrial), 
+          "Time Trial: " + Math.round(this.game.world.time_trial), 
           30, this.game.world.height - 90,
           150
         );           
@@ -140,12 +141,12 @@ const Display = function(canvas, game) {
       this.buffer.font = "small-caps bold " + TEXT_SIZE*2 + "px gamer";        
 
       this.buffer.fillText(
-        "Time Trial Best: " + Math.round(this.game.world.timeTrialHigh) + " seconds", 
+        "Time Trial Best: " + Math.round(this.game.world.time_trial_high) + " seconds", 
         30, 45,
         250
       ); 
       
-      if(this.game.world.froggy.explodeTime <= 0){
+      if(this.game.world.froggy.explode_time <= 0){
         this.buffer.fillText(
           "Froggy died... R.I.P. Froggy", 
           30, 70,
@@ -246,24 +247,24 @@ const Display = function(canvas, game) {
             this.buffer.font = "small-caps bold " + TEXT_SIZE*3 + "px gamer";  
 
           }else{
-            this.buffer.fillStyle = "rgba(168,207,254)";
+            this.buffer.fillStyle = "rgba(142,222,131)";
             this.buffer.font = TEXT_SIZE + "px gamer";  
           }
           this.buffer.fillText(message, object.x, object.y - object.height/2);
         }
 
-        if(messageTime === 0){
-          messageTime = clock 
+        if(message_time === 0){
+          message_time = clock 
         }      
 
         // After 3 seconds the message will vanish
-        if(clock - messageTime >= 3){    
+        if(clock - message_time >= 3){    
         
           this.game.world.messages.delete(message, object); // delete the current message
 
-          object.sendMessage = false; // Now a new message can be received
+          object.send_message = false; // Now a new message can be received
 
-          messageTime = 0;        
+          message_time = 0;        
         } 
       }       
     }

@@ -9,10 +9,12 @@
 const Enemy = function(game, x, y) {
 
     this.tag        = "Enemy";
-    this.tagNr      = Math.random();
+    this.tag_nr      = Math.random();
     this.color      = "rgb(0,255,128)";
     this.width      = ENEMY_WIDTH;   
-    this.height     = ENEMY_HEIGHT;   
+    this.height     = ENEMY_HEIGHT; 
+    this.init_width = ENEMY_WIDTH;
+    this.init_height= ENEMY_HEIGHT;     
     this.velocity_x = Math.random() * ENEMY_SPEED / FPS;
     this.velocity_y = Math.random() * ENEMY_SPEED / FPS;
     this.x          = x;
@@ -31,10 +33,10 @@ const Enemy = function(game, x, y) {
   Enemy.prototype = {
   
     constructor : Enemy,   
-    explodeTime: EXPLODE_TIME,
+    explode_time: EXPLODE_TIME,
     lastShot: 0,
     fireRate: FIRE_RATE,
-    myMessages: [
+    my_messages: [
       "I will shoot you!",
       "come BACK here!",
       "bleep blorp zorg",
@@ -49,7 +51,7 @@ const Enemy = function(game, x, y) {
       "ik zal je neerschieten",
       "ti sparaghju"
     ],     
-    sendMessage:false,
+    send_message:false,
        
     
     /**
@@ -143,8 +145,8 @@ const Enemy = function(game, x, y) {
         
         //Messaging
         if(this.canShoot){
-          if(!this.sendMessage){
-            this.game.world.messenger(this.myMessages[Math.floor(Math.random() * this.myMessages.length)], this);           
+          if(!this.send_message){
+            this.game.world.messenger(this.my_messages[Math.floor(Math.random() * this.my_messages.length)], this);           
           }     
         }
       }else{

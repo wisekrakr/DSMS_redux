@@ -15,12 +15,14 @@ const Debris = function(game, x, y, w, h, color) {
     this.color      = color;
     this.width      = w;   
     this.height     = h;  
+    this.init_width = w;
+    this.init_height= h;   
     this.velocity_x = Math.random() * 60 / FPS;
     this.velocity_y = Math.random() * 60 / FPS; 
     this.x          = x;
     this.y          = y;
     this.angle      = Math.random() * 180 / Math.PI;
-    this.lifeTime   = 2 * FPS;
+    this.lifeTime   = 0.8 * FPS;
     this.game       = game;  
     
     this.game.instance.gameEngine.gameEngine.addObject(this);

@@ -6,24 +6,24 @@ const World = function(game){
 
     this.friction= 0.9;  
 
-    this.height = HEIGHT;
     this.width = WIDTH;  
+    this.height = HEIGHT;
 
-    this.timeKeeper = 0;
-    this.deathTime = 0;
+    this.time_keeper = 0;
+    this.death_time = 0;
     this.score = 0;
-    this.timeTrial = 0;  
-    this.timeTrialHigh = 0;
+    this.time_trial = 0;  
+    this.time_trial_high = 0;
     this.counter = 0;
 
-    this.numberOfAsteroids=  ASTEROID_NUMBER;
-    this.numberOfEnemies= ENEMY_NUMBER;
+    this.number_asteroids=  ASTEROID_NUMBER;
+    this.number_enemies= ENEMY_NUMBER;
 
     // Game Objects
-    this.player=new Player(game);
+    this.player=new Player(game, this.width/2, this.height/2);
     this.asteroids=new Set();
     this.enemies=new Set();
-    this.meteorShower=new Set();
+    this.meteor_shower=new Set();
     this.planets=new Set();
 
     this.letItRain= false;
@@ -32,15 +32,49 @@ const World = function(game){
             
     // Text messages  
     this.messages= new Map();  
-    this.worldMessage=new WorldMessage();
+    this.worldMessage=new WorldMessage(this);
 
     this.game = game;
 }
  
 World.prototype = { 
 
-    constructor : World,
+    constructor : World, 
+    distance:0,
 
+    changePerspective:function(object){
+       
+        let new_distance = this.game.instance.gameEngine.gameEngine.distanceBetweenPoints(
+            object.x, object.y, this.width/2, this.height/2
+        );
+        
+        let angle = Math.atan2(this.height/2 - object.y, this.width/2 - object.x);
+        
+        
+       
+        if(new_distance > this.distance){  
+            let diff = new_distance - this.distance;   
+            
+            if(object.width >= object.init_width/2 && object.height >= object.init_height/2){
+                object.width -= (diff/5000) * (this.fps/10);
+                object.height -=  (diff/5000) * (this.fps/10);            
+            }
+            
+            this.distance = new_distance;            
+        }else{
+            let diff = this.distance - new_distance;      
+
+            if(object.width <= object.init_width && object.height <= object.init_height){
+                object.width += (diff/5000) * (this.fps/10);
+                object.height +=  (diff/5000) * (this.fps/10);
+            }
+
+            this.distance = new_distance;
+        }
+    
+        
+      
+    },
 
     /**
      * Out of bounds Detection
@@ -73,7 +107,7 @@ World.prototype = {
      */
     messenger : function(message, object){  
         this.messages.set(message, object); 
-        object.sendMessage = true;
+        object.send_message = true;
     },
 
     /**
@@ -83,16 +117,9 @@ World.prototype = {
      * for that time.
      * Keeps track of the high score.
      */
-    levelProgression : function(){
-            
-        localStorage.setItem(DSMS_HIGH_SCORES, 0);      
-
-        if(this.score > parseInt(localStorage.getItem(DSMS_HIGH_SCORES))){       
-
-            localStorage.setItem(DSMS_HIGH_SCORES, this.score);
-        }      
+    levelProgression : function(){        
         
-        switch(Math.round(this.timeKeeper)){   
+        switch(Math.round(this.time_keeper)){   
             case 3:
                 this.letItRain = true;          
                 this.messenger("Protect the Planet from Meteors", this.worldMessage);    
@@ -101,7 +128,7 @@ World.prototype = {
                 this.letItRain = false;
                 break;
             case 60:          
-                this.numberOfEnemies = ENEMY_NUMBER*2;          
+                this.number_enemies = ENEMY_NUMBER*2;          
                 break;
             case 82:
                 if(this.froggy === null){
@@ -111,7 +138,7 @@ World.prototype = {
                 }                 
                 break;
             case 120:
-                this.numberOfAsteroids = ASTEROID_NUMBER*2;   
+                this.number_asteroids = ASTEROID_NUMBER*2;   
             
                 break;
             case 180:         
@@ -122,8 +149,8 @@ World.prototype = {
                 }
                 break;       
             case 240:
-                this.numberOfAsteroids = ASTEROID_NUMBER * 3;
-                this.numberOfEnemies = ASTEROID_NUMBER * 3;
+                this.number_asteroids = ASTEROID_NUMBER * 3;
+                this.number_enemies = ENEMY_NUMBER * 3;
                 
                 break;
         }
@@ -138,29 +165,27 @@ World.prototype = {
 
         if(this.player === null){
 
-            this.player = new Player(this.game);                 
+            this.player = new Player(this.game, this.width/2, this.height/2);                 
                 
             this.score = 0;
-            this.timeKeeper = 0;
+            this.time_keeper = 0;
 
         }else{       
    
             let delta = this.game.instance.spaceEngine.delta /1000;
             let clock = this.game.instance.spaceEngine.clock /1000;
             
-            this.timeKeeper += delta;
+            this.time_keeper += delta;
             
             if(this.player.live <= 0){
                 // GAME OVER
-                this.game.instance.gameEngine.gameEngine.removeObject(this.player); 
-                this.game.instance.gameEngine.gameEngine.removeObject(this.player.thruster);                        
+                this.game.instance.gameEngine.gameEngine.removeObject(this.player);    
                   
-                  
-                if(this.deathTime === 0){
-                    this.deathTime = clock;       
+                if(this.death_time === 0){
+                    this.death_time = clock;       
                 }      
                 
-                if(clock - this.deathTime >= RESPAWN_TIME){                 
+                if(clock - this.death_time >= RESPAWN_TIME){                 
                     this.player = null; // Player is null will start a new game
                     this.destroyWorld(); // Remove everything from display and start anew                            
                 }        
@@ -186,30 +211,40 @@ World.prototype = {
                     }    
                 }else{
                     // Remove meteors and planets
-                    for(let met of this.meteorShower){    
+                    for(let met of this.meteor_shower){    
                         this.game.instance.gameEngine.gameEngine.removeObject(met); 
                     }
+                    this.meteor_shower.clear();
+
                     for(let planet of this.planets){    
-                        this.game.instance.gameEngine.gameEngine.removeObject(planet); 
+                       
+                        let distance = this.game.instance.gameEngine.gameEngine.distanceBetweenPoints(
+                            planet.x, planet.y, this.width, this.height/2
+                        );
+                
+                        if(distance > 10){
+                            planet.x += planet.speed;      
+                        }else{
+                            this.planets.clear();
+                            this.game.instance.gameEngine.gameEngine.removeObject(planet);
+                        }
                     }
-                    this.meteorShower.clear();
-                    this.planets.clear();
                 }
                 
                 // case 82 of levelProgression: Create Froggy
 
                 if(this.froggy !== null){                     
                     if(this.froggy.following){             
-                        this.timeTrial += 1 / this.fps; 
+                        this.time_trial += 1 / this.fps; 
                 
                     }else{
-                        if(this.timeTrial > 0){
-                            this.score += this.timeTrial * 10;
+                        if(this.time_trial > 0){
+                            this.score += this.time_trial * 10;
 
-                            if(this.timeTrial > this.timeTrialHigh){
-                                this.timeTrialHigh = this.timeTrial;
+                            if(this.time_trial > this.time_trial_high){
+                                this.time_trial_high = this.time_trial;
                             }      
-                            this.timeTrial = 0;         
+                            this.time_trial = 0;         
                         }            
                     }
                 }                                         
@@ -220,7 +255,9 @@ World.prototype = {
                     this.outOfBounds(object);    
 
                     // Handle exploding objects and setting the Score
-                    this.game.scoreAndObjectHandler(object);        
+                    this.game.scoreAndObjectHandler(object); 
+                    
+                    this.changePerspective(object);
                 }
             }
         }
@@ -239,24 +276,25 @@ World.prototype = {
 
     this.enemies.clear();
     this.asteroids.clear();
-    this.meteorShower.clear();
+    this.meteor_shower.clear();
     this.planets.clear();
     this.froggy = null;    
-    this.deathTime = 0; 
+    this.death_time = 0; 
     this.counter = 0;
-    this.timeTrial = 0; 
+    this.time_trial = 0; 
     if(this.letItRain){
         this.letItRain = false;
     }
   }
+  
 };
 
-const WorldMessage = function() {
+const WorldMessage = function(world) {
   
-    this.width      = WIDTH/2;    
-    this.height     = HEIGHT/2;  
-    this.x          = CENTER_X;
-    this.y          = CENTER_Y; 
+    this.width      = world.width/2;    
+    this.height     = world.height/2;  
+    this.x          = world.width/2; 
+    this.y          = world.height/2; 
     
 };
   

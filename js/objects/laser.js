@@ -10,10 +10,12 @@
 const Laser = function(game,x, y, a, parent) {
 
     this.tag        = "Laser";
-    this.tagNr      = Math.random();
+    this.tag_nr      = Math.random();
     this.color      = "rgb(255,165,0)";
     this.width      = LASER_WIDTH; 
-    this.height     = LASER_HEIGHT;   
+    this.height     = LASER_HEIGHT; 
+    this.init_width = LASER_WIDTH;
+    this.init_height= LASER_HEIGHT;     
     this.velocity_x = LASER_SPEED / FPS;
     this.velocity_y = LASER_SPEED / FPS;   
     this.angle      = a;     

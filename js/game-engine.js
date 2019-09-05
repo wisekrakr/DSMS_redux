@@ -6,20 +6,20 @@ const GameEngine = function(){
     this.gameEngine = {
 
         gameObjects: new Set(),
-        toBeRemoved:new Set(),
+        toBeRemoved: new Set(),
 
         // Add an object to a set to further use in the game
         addObject : function(object) {
 
-            this.gameObjects.add(object, object.tagNr);              
+            this.gameObjects.add(object, object.tag_nr);              
         },
 
         //Removes an object from the set that runs in the game. 
         //This places the object outside of the game.
         removeObject : function(object) {   
 
-            this.gameObjects.delete(object, object.tagNr);
-            this.toBeRemoved.add(object, object.tagNr);
+            this.gameObjects.delete(object, object.tag_nr);
+            this.toBeRemoved.add(object, object.tag_nr);
         },
 
         /**
@@ -68,7 +68,7 @@ const GameEngine = function(){
          */
         explode : function(object, game, bits){
             
-            if(object !== null && object.explodeTime > 0){
+            if(object !== null && object.explode_time > 0){
                 let debrisParts = [];
                 for (let i = debrisParts.length; i < bits; i++) {      
                     debrisParts[i] = new Debris(game, 
@@ -78,7 +78,7 @@ const GameEngine = function(){
                         );
         
                 } 
-                object.explodeTime--;
+                object.explode_time--;
             }
         },  
 
@@ -92,7 +92,7 @@ const GameEngine = function(){
     
             for (let sub of this.gameObjects) {      
     
-                if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
+                if (sub !== object && sub.tag !== 'Debris') {   
                     
                     if (this.distanceBetweenObjects(object, sub) < object.height + sub.height ||
                         this.distanceBetweenObjects(object, sub) < object.width + sub.width) {                
@@ -115,7 +115,7 @@ const GameEngine = function(){
                
             for (let sub of this.gameObjects) {      
     
-                if (sub !== object && sub.tag !== "Thruster" && sub.tag !== 'Debris') {   
+                if (sub !== object  && sub.tag !== 'Debris') {   
                     
                     if (this.distanceBetweenPoints(object.x, object.y, sub.x, sub.y) < 
                         object.width + sub.width && object.height + sub.height) {   
@@ -126,6 +126,15 @@ const GameEngine = function(){
             }        
             
             return collisionObject;
+        },
+
+         /**
+         * Function to subtract damage taken from live (health percentage)
+         */
+        subtractFromLive: function(object){
+            let damage = (object.collided_with.width + object.collided_with.height) / 2;
+
+            object.live -= damage;  
         },
         
         // Every object needs to run their respective update function.

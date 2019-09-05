@@ -8,15 +8,17 @@
 const Asteroid = function(game,x, y, w, h) {
 
     this.tag        = "Asteroid";
-    this.tagNr      = Math.random();
+    this.tag_nr      = Math.random();
     this.color      = "rgba(255,255,255,0.3)";
     this.width      = w;    
-    this.height     = h;   
+    this.height     = h;
+    this.init_width = w;
+    this.init_height= h;   
     this.velocity_x = Math.random() * AS_SPEED / FPS *(Math.random() < 0.5 ? 1 : -1);
     this.velocity_y = Math.random() * AS_SPEED / FPS *(Math.random() < 0.5 ? 1 : -1);
     this.angle      = Math.random() * Math.PI * 2;
     this.speed      = AS_SPEED;
-    this.rotateSpeed= Math.random() * AS_ROTATE_SPEED;   
+    this.rotate_speed= Math.random() * AS_ROTATE_SPEED;   
     this.x          = x;
     this.y          = y;
     this.vertices   = Math.floor(Math.random() * (VERTICES + 1) + VERTICES /2);
@@ -34,8 +36,8 @@ const Asteroid = function(game,x, y, w, h) {
 Asteroid.prototype = {
 
     constructor : Asteroid,  
-    explodeTime: EXPLODE_TIME,
-    collidedWith: null,
+    explode_time: EXPLODE_TIME,
+    collided_with: null,
 
     /**
      * If the Asteroid collides: this will return true and also sets a collision object
@@ -45,7 +47,7 @@ Asteroid.prototype = {
             this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
             this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser){
           
-            this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+            this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
 
           return true;
         }
@@ -70,7 +72,7 @@ Asteroid.prototype = {
         }
         //Set the appropriate rotation         
         
-        this.angle += this.rotateSpeed / this.game.world.fps;
+        this.angle += this.rotate_speed / this.game.world.fps;
     },    
 
 };  

@@ -9,10 +9,12 @@
 const Meteor = function(game,x, y) {
 
     this.tag        = "Meteor";
-    this.tagNr      = Math.random();
+    this.tag_nr      = Math.random();
     this.color      = "rgb(180,230,245,0.6)";
     this.width      = AS_WIDTH/3.3;    
     this.height     = AS_HEIGHT/3.3; 
+    this.init_width = AS_WIDTH/3.3;
+    this.init_height= AS_HEIGHT/3.3;   
     this.velocity_x = Math.random() * (AS_SPEED * 2) / FPS;
     this.velocity_y = Math.random() * (AS_SPEED * 2) / FPS;
     this.angle      = Math.random();
@@ -34,9 +36,9 @@ const Meteor = function(game,x, y) {
 Meteor.prototype = {
 
     constructor : Meteor,  
-    collidedWith:null,  
-    sendMessage:false,
-    explodeTime:EXPLODE_TIME,
+    collided_with:null,  
+    send_message:false,
+    explode_time:EXPLODE_TIME,
 
     /**
     * If the meteor collides this will return true and also sets a collision object
@@ -47,7 +49,7 @@ Meteor.prototype = {
           this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser || 
           this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Planet){   
               
-            this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+            this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
 
             return true;
       }    
@@ -78,22 +80,24 @@ Meteor.prototype = {
         
         if(this.collide()){
             // Get destroyed.
-            if(this.collidedWith instanceof Planet){
+            if(this.collided_with instanceof Planet){
                 this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
-            }else if(this.collidedWith instanceof Player){
+                  
+                this.game.world.score -= 20;
+            }else if(this.collided_with instanceof Player){
                 this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
 
                 this.velocity_x = 0;
                 this.velocity_y = 0;  
 
-                if(!this.sendMessage){
+                if(!this.send_message){
                     this.game.world.messenger("+100", this);                   
                 }
             }
 
             // // Bounce of collided object
             // else{
-            //     this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,this.collidedWith);
+            //     this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,this.collided_with);
 
             //     this.velocity_x = -this.velocity_x * AS_SPEED;
             //     this.velocity_y = -this.velocity_y * AS_SPEED;  

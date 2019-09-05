@@ -9,28 +9,34 @@
 const Planet = function(game) {
 
     this.tag        = "Planet";
-    this.tagNr      = Math.random();
-    this.color      = "rgba(224,0,238, 1)";
+    this.tag_nr      = Math.random();
+    this.color      = "#000000";
     this.width      = AS_WIDTH*2;    
     this.height     = AS_HEIGHT*2;  
+    this.init_width = AS_WIDTH*2;
+    this.init_height= AS_HEIGHT*2;   
     this.x          = 0;
     this.y          = HEIGHT/2; 
     this.angle      = 0;
-    this.velocity_x = 200 / FPS;
-    this.velocity_y = 0;      
+    this.speed      = 100/ FPS;
+    this.velocity_x = 100 / FPS;
+    this.velocity_y = 0;   
+    this.live       = 500;   
     this.game       = game;  
 
     this.game.instance.gameEngine.gameEngine.addObject(this);
-    
+    this.color = this.game.colorPicker([
+        "#a2eeec", "#b8c7ff", "#f9b5c6", "#f9e796", "#fdd8c4"
+    ]);
 };
 
 Planet.prototype = {
 
     constructor : Planet,  
-    collidedWith:null,  
-    sendMessage:false,
-    explodeTime:EXPLODE_TIME*2,
-    myMessages:[
+    collided_with:null,  
+    send_message:false,
+    explode_time:EXPLODE_TIME*2,
+    my_messages:[
         fail=[
             "ow this hurts",
             "why? Flubelie! WHY?!?!",
@@ -42,7 +48,9 @@ Planet.prototype = {
             "you're so sexy!"
         ]    
     ],
-    hitsUntilDestruction:0, // 6 hits will destroy the planet
+    blink_time : Math.ceil(BLINK_TIME * FPS), // Time the planet blinks when invulnerable  
+    hit: false,
+    
 
     /**
     * If the Planet collides this will return true and also sets a collision object
@@ -50,51 +58,66 @@ Planet.prototype = {
     collide: function () {       
         if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Meteor){   
               
-            this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+            this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
 
             return true;
       }    
       return false;      
     },
+
+    /**
+    * If the planet gets hit it will blink for a couple of seconds (blink_time)
+    */
+    blinking: function(){             
+            
+        if(this.hit){
+            this.blink_time--;   
+            
+            this.color = this.game.colorPicker([
+                "#a2eeec", "#b8c7ff", "#f9b5c6", "#f9e796", "#fdd8c4"
+            ]);
+            
+            if(this.blink_time === 0){
+               
+                this.blink_time = Math.ceil(BLINK_TIME * FPS);
+
+                this.hit = false;
+            }  
+        }
+    },  
    
     /**
     * Updates movement and collision
     */
     update: function() {
 
-        let distance = this.game.instance.gameEngine.gameEngine.distanceBetweenPoints(
-            this.x, this.y, CENTER_X, CENTER_Y
-        );
+        if(this.live <= 0){          
+            this.game.instance.gameEngine.gameEngine.explode(this, this.game, 7);  
+          
+        }else{  
 
-        if(distance > 10){
-            this.x += this.velocity_x; 
-            this.y += this.velocity_y;  
-        }      
-         
-        if(this.collide()){
-                       
-            if(!this.sendMessage){
-                this.game.world.messenger(this.myMessages[0][Math.floor(Math.random() * this.myMessages[0].length)] + " -1000", this);
-            }
-            this.hitsUntilDestruction++;
-        }
+            let distance = this.game.instance.gameEngine.gameEngine.distanceBetweenPoints(
+                this.x, this.y, this.game.world.width/2, this.game.world.height/2
+            );
 
-
-
-
-
-        // TODO WHAT TO DO WHEN GETTING HIT OR GETTING HIT TO MANY TIMES!
-        if(this.hitsUntilDestruction > 0){
-            this.color = "rgba(224,0,238, " + 1/this.hitsUntilDestruction + ")"; 
-           
-
-            if(this.hitsUntilDestruction === 6){
-                this.color = "rgba(224,0,238, 1)";
-                this.game.instance.gameEngine.gameEngine.explode(this, this.game, 7);
-                console.log("explode planet")
-            }
-        }
+            if(distance > 10){
+                this.x += this.velocity_x;                 
+            }      
+            
+            if(this.collide()){        
+                        
+                if(!this.send_message){
+                    this.game.world.messenger(this.my_messages[0][Math.floor(Math.random() * this.my_messages[0].length)] + " -80", this);
+                }        
                 
-    },    
+                // Substract from live
+                this.game.instance.gameEngine.gameEngine.subtractFromLive(this);   
 
+                this.hit = true;
+            }
+
+            // Blink to show being hit      
+            this.blinking();           
+        }     
+    }  
 };      

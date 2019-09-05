@@ -26,8 +26,7 @@ window.addEventListener("load", function() {
         
         // Give gameobjects their shape and color        
 
-        for(let sub of game.instance.gameEngine.gameEngine.gameObjects){    
-            let object = sub;
+        for(let object of game.instance.gameEngine.gameEngine.gameObjects){             
                                   
             switch(object.tag){
                 case 'Player':                                                           
@@ -39,10 +38,7 @@ window.addEventListener("load", function() {
                     //     display.context.globalAlpha = 1;
                     //     game.world.fps = FPS;
                     // }
-                    break;
-                case 'Thruster':
-                    display.drawTriangle(object);     
-                    break;
+                    break;                
                 case 'Planet': 
                     display.drawCircle(object, true);
                     break;

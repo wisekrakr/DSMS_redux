@@ -6,10 +6,12 @@
 const Froggy = function(game,x ,y) {
 
     this.tag        = "Froggy";
-    this.tagNr      = Math.random();
+    this.tag_nr      = Math.random();
     this.color      = "#ffffff";
     this.width      = PLAYER_WIDTH;
-    this.height     = PLAYER_HEIGHT;  
+    this.height     = PLAYER_HEIGHT; 
+    this.init_width = PLAYER_WIDTH;
+    this.init_height= PLAYER_HEIGHT;    
     this.velocity_x = Math.random() * ENEMY_SPEED / FPS;
     this.velocity_y = Math.random() * ENEMY_SPEED / FPS;
     this.x          = x;
@@ -26,9 +28,9 @@ const Froggy = function(game,x ,y) {
 Froggy.prototype = {
 
     constructor : Froggy,
-    collidedWith:null,
-    explodeTime: EXPLODE_TIME,
-    myMessages: [
+    collided_with:null,
+    explode_time: EXPLODE_TIME,
+    my_messages: [
       fail=[
         "they got me!",
         "you failed me!",
@@ -44,7 +46,7 @@ Froggy.prototype = {
         "vape's are on me!"
       ]    
     ],  
-    sendMessage:false,
+    send_message:false,
     following:false,
   
     /**
@@ -54,7 +56,7 @@ Froggy.prototype = {
         if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
             this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid){       
                 
-                this.collidedWith = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+                this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
 
             return true;
         }    
@@ -113,12 +115,12 @@ Froggy.prototype = {
 
         if(this.collide()){            
                 
-            if(this.collidedWith instanceof Enemy || this.collidedWith instanceof Asteroid){
+            if(this.collided_with instanceof Enemy || this.collided_with instanceof Asteroid){
               
-                this.game.world.timeTrial = 0;
+                this.game.world.time_trial = 0;
 
-                if(!this.sendMessage){
-                    this.game.world.messenger(this.myMessages[0][Math.floor(Math.random() * this.myMessages[0].length)], this);
+                if(!this.send_message){
+                    this.game.world.messenger(this.my_messages[0][Math.floor(Math.random() * this.my_messages[0].length)], this);
                  
                 }  
 
@@ -129,10 +131,10 @@ Froggy.prototype = {
         }else{
             this.behavior();
 
-            switch(Math.round(this.game.world.timeTrial)){
+            switch(Math.round(this.game.world.time_trial)){
                 case 15: case 28: case 42: case 66: case 99:           
-                    if(!this.sendMessage){
-                        this.game.world.messenger(this.myMessages[1][Math.floor(Math.random() * this.myMessages[1].length)], this);
+                    if(!this.send_message){
+                        this.game.world.messenger(this.my_messages[1][Math.floor(Math.random() * this.my_messages[1].length)], this);
                       
                     }     
                     break;
