@@ -24,9 +24,10 @@ const Player = function(game,x,y) {
   this.live       = 100;
   this.acc        = false;
   this.invul      = false;
+  this.audio      = new AudioContext();
   this.game       = game; 
  
-  this.game.instance.gameEngine.gameEngine.addObject(this);
+  this.game.gameEngine.addObject(this);
 };
 
 Player.prototype = {
@@ -41,6 +42,7 @@ Player.prototype = {
   collided_with: null,
   my_messages:[], 
   send_message:false,
+
  
   forward:function() { this.acc = true;}, 
   moveLeft:function()  { this.rotation = this.rotate_speed /180 * Math.PI / this.game.world.fps; },
@@ -53,11 +55,11 @@ Player.prototype = {
   collide: function () {
        
     if(!this.invul){
-      if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser){
+      if(this.game.gameEngine.collisionObject(this) instanceof Asteroid || 
+          this.game.gameEngine.collisionObject(this) instanceof Enemy || 
+          this.game.gameEngine.collisionObject(this) instanceof Laser){
 
-          this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+          this.collided_with = this.game.gameEngine.collisionObject(this);
 
         return true;
       }
@@ -125,7 +127,7 @@ Player.prototype = {
           this.velocity_y += this.speed * Math.sin(this.angle) / this.game.world.fps;
 
           // Simulates boosting engine
-          this.boosting();
+          this.boosting();    
 
           this.acc = false;
         }else{
@@ -146,10 +148,10 @@ Player.prototype = {
         this.velocity_y = 0;    
         
         // Substract live from the player
-        this.game.instance.gameEngine.gameEngine.subtractFromLive(this);   
+        this.game.gameEngine.subtractFromLive(this);   
 
         // Explode animation (creating debris)        
-        this.game.instance.gameEngine.gameEngine.explode(this, this.game, 5);        
+        this.game.gameEngine.explode(this, this.game, 5);        
               
         // Start the invulnerable period.
         this.invul = true;        

@@ -26,7 +26,7 @@ window.addEventListener("load", function() {
         
         // Give gameobjects their shape and color        
 
-        for(let object of game.instance.gameEngine.gameEngine.gameObjects){             
+        for(let object of game.gameEngine.gameObjects){             
                                   
             switch(object.tag){
                 case 'Player':                                                           
@@ -72,8 +72,8 @@ window.addEventListener("load", function() {
         
              
         // Remove gameobjects
-        if(game.instance.gameEngine.gameEngine.toBeRemoved.length > 0){
-            for(let sub of game.instance.gameEngine.gameEngine.toBeRemoved){   
+        if(game.gameEngine.toBeRemoved.length > 0){
+            for(let sub of game.gameEngine.toBeRemoved){   
                 let object = sub;                
                 
                 if(object !== undefined){
@@ -85,7 +85,7 @@ window.addEventListener("load", function() {
                         object.height
                     );
 
-                    game.instance.gameEngine.gameEngine.toBeRemoved.delete(object);
+                    game.gameEngine.toBeRemoved.delete(object);
                 }
             }
         }
@@ -112,14 +112,15 @@ window.addEventListener("load", function() {
   
     // Initialize Components  
     
-    /* The controller handles user input. */
-    let controller = new Controller();        
+      
     /* The engine is where the above three sections can interact. */
     let engine = new Engine(1000/FPS, render, update);        
     /* The game will hold our game logic. */
-    let game = new Game(engine); 
+    let game = new Game(engine);     
+    /* The controller handles user input. */
+    let controller = new Controller(game);  
     /* The display handles window resizing, as well as the on screen canvas. */
-    let display = new Display(document.querySelector("canvas"), game);
+    let display = new Display(document.querySelector("canvas"), game, controller);    
      
 
     /* Every pixel must be the same

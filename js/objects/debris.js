@@ -25,7 +25,7 @@ const Debris = function(game, x, y, w, h, color) {
     this.lifeTime   = 0.8 * FPS;
     this.game       = game;  
     
-    this.game.instance.gameEngine.gameEngine.addObject(this);
+    this.game.gameEngine.addObject(this);
 };
 
 Debris.prototype = {
@@ -43,7 +43,7 @@ Debris.prototype = {
     if(this.lifeTime > 0){
       this.lifeTime--;      
     }else{
-      this.game.instance.gameEngine.gameEngine.removeObject(this);
+      this.game.gameEngine.removeObject(this);
     }
   },   
   

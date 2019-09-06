@@ -44,7 +44,7 @@ World.prototype = {
 
     changePerspective:function(object){
        
-        let new_distance = this.game.instance.gameEngine.gameEngine.distanceBetweenPoints(
+        let new_distance = this.game.gameEngine.distanceBetweenPoints(
             object.x, object.y, this.width/2, this.height/2
         );
         
@@ -70,10 +70,7 @@ World.prototype = {
             }
 
             this.distance = new_distance;
-        }
-    
-        
-      
+        }      
     },
 
     /**
@@ -120,38 +117,56 @@ World.prototype = {
     levelProgression : function(){        
         
         switch(Math.round(this.time_keeper)){   
-            case 3:
-                this.letItRain = true;          
-                this.messenger("Protect the Planet from Meteors", this.worldMessage);    
-                break;        
-            case 59:
-                this.letItRain = false;
+            case 1: case 4:
+                this.messenger("W,A,D or Arrows to move, DODGE the ASTEROIDS", this.worldMessage); 
                 break;
-            case 60:          
+            case 8: case 11:
+                this.messenger("ENEMIES destroy ASTEROIDS, and VICE VERSA", this.worldMessage); 
+                break;    
+            case 16: case 19:
+                this.messenger("SURVIVE for 300 seconds and get the Highest Score", this.worldMessage); 
+                break;
+            case 25: case 28: case 30:
+                this.messenger("Don't Shoot BACK: A Space Passivist Saga", this.worldMessage); 
+                break;
+            case 60:
+                this.letItRain = true;          
+                this.messenger("Protect the Planet from Meteors", this.worldMessage); 
+                newStageSound(this.game.gameAudio);           
+                break;        
+            case 90:
+                this.letItRain = false;
+                newStageSound(this.game.gameAudio);  
+                break;
+            case 120:          
                 this.number_enemies = ENEMY_NUMBER*2;          
                 break;
-            case 82:
+            case 130:
                 if(this.froggy === null){
                     //Create a Froggy to escort to a safe haven at a random position
                     this.froggy = new Froggy(this.game, 0, Math.random() * this.height); 
-                    this.messenger("Time Trail: Escort Mission!", this.worldMessage);                        
+                    this.messenger("Time Trail: Escort Mission!", this.worldMessage); 
+                    newStageSound(this.game.gameAudio);                         
                 }                 
                 break;
-            case 120:
-                this.number_asteroids = ASTEROID_NUMBER*2;   
+            case 180:
+                this.number_asteroids = ASTEROID_NUMBER*2;  
             
                 break;
-            case 180:         
+            case 220:         
                 if(this.froggy === null){
                     //Create a Froggy to escort to a safe haven at a random position
                     this.froggy = new Froggy(this.game, 0, Math.random() * this.height);  
-                    this.messenger("Time Trail 2: Escort Harder!", this.worldMessage);   
+                    this.messenger("Time Trail 2: Escort Harder!", this.worldMessage);
+                    newStageSound(this.game.gameAudio);     
                 }
                 break;       
             case 240:
                 this.number_asteroids = ASTEROID_NUMBER * 3;
-                this.number_enemies = ENEMY_NUMBER * 3;
-                
+                this.number_enemies = ENEMY_NUMBER * 3;                
+                break;
+            case 300:
+                //YOU WIN
                 break;
         }
     },  
@@ -172,17 +187,24 @@ World.prototype = {
 
         }else{       
    
-            let delta = this.game.instance.spaceEngine.delta /1000;
-            let clock = this.game.instance.spaceEngine.clock /1000;
+            let delta = this.game.spaceEngine.delta /1000;
+            let clock = this.game.spaceEngine.clock /1000;
             
             this.time_keeper += delta;
             
             if(this.player.live <= 0){
                 // GAME OVER
-                this.game.instance.gameEngine.gameEngine.removeObject(this.player);    
-                  
+                this.game.gameEngine.removeObject(this.player);                 
+                                   
                 if(this.death_time === 0){
-                    this.death_time = clock;       
+                    this.death_time = clock;  
+                    
+                    //Game Over sound
+                    this.game.gameAudio.play(350, 0.1, "sine").stop(0.6);    
+                    this.game.gameAudio.play(500, 0.25, "sine", 0.6).stop(1.3);     
+                    this.game.gameAudio.play(280, 0.3, "sine", 1.3).stop(2.0); 
+                    this.game.gameAudio.play(310, 0.4, "sine", 2.0).stop(2.65); 
+                
                 }      
                 
                 if(clock - this.death_time >= RESPAWN_TIME){                 
@@ -198,7 +220,7 @@ World.prototype = {
                 // case 25 of levelProgression: Create Meteors
 
                 if(this.letItRain){
-                   
+                             
                     this.game.setPlanets();
                     
                     if(this.counter === 0){
@@ -212,13 +234,13 @@ World.prototype = {
                 }else{
                     // Remove meteors and planets
                     for(let met of this.meteor_shower){    
-                        this.game.instance.gameEngine.gameEngine.removeObject(met); 
+                        this.game.gameEngine.removeObject(met); 
                     }
                     this.meteor_shower.clear();
 
                     for(let planet of this.planets){    
                        
-                        let distance = this.game.instance.gameEngine.gameEngine.distanceBetweenPoints(
+                        let distance = this.game.gameEngine.distanceBetweenPoints(
                             planet.x, planet.y, this.width, this.height/2
                         );
                 
@@ -226,7 +248,7 @@ World.prototype = {
                             planet.x += planet.speed;      
                         }else{
                             this.planets.clear();
-                            this.game.instance.gameEngine.gameEngine.removeObject(planet);
+                            this.game.gameEngine.removeObject(planet);
                         }
                     }
                 }
@@ -249,7 +271,7 @@ World.prototype = {
                     }
                 }                                         
 
-                for(let object of this.game.instance.gameEngine.gameEngine.gameObjects){       
+                for(let object of this.game.gameEngine.gameObjects){       
             
                     // When object goes out of bounds it will return from the opposite side
                     this.outOfBounds(object);    
@@ -269,8 +291,8 @@ World.prototype = {
    * This will clear all information and we can start a new world.
    */
   destroyWorld : function(){
-    for(let object of this.game.instance.gameEngine.gameEngine.gameObjects){ 
-      this.game.instance.gameEngine.gameEngine.removeObject(object);    
+    for(let object of this.game.gameEngine.gameObjects){ 
+      this.game.gameEngine.removeObject(object);    
 
     }
 
@@ -287,6 +309,24 @@ World.prototype = {
     }
   }
   
+};
+
+let timer = Math.ceil(0.12 * 60);
+function newStageSound(gameAudio){
+    timer--;
+    
+    if(timer > 0){
+        
+        gameAudio.play(587.3, 0.5, "sine").stop(0.25);
+        gameAudio.play(587.3, 0.5, "sine", 0.3).stop(0.35);
+        gameAudio.play(659.3, 0.5, "sine", 0.4).stop(0.55);
+        gameAudio.play(587.3, 0.5, "sine", 0.6).stop(0.75);
+        gameAudio.play(784.0, 0.5, "sine", 0.8).stop(0.95);
+        gameAudio.play(740.0, 0.5, "sine", 1.0).stop(1.40);
+
+        timer = 0;
+    }
+   
 };
 
 const WorldMessage = function(world) {

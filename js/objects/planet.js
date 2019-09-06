@@ -24,7 +24,7 @@ const Planet = function(game) {
     this.live       = 500;   
     this.game       = game;  
 
-    this.game.instance.gameEngine.gameEngine.addObject(this);
+    this.game.gameEngine.addObject(this);
     this.color = this.game.colorPicker([
         "#a2eeec", "#b8c7ff", "#f9b5c6", "#f9e796", "#fdd8c4"
     ]);
@@ -56,9 +56,9 @@ Planet.prototype = {
     * If the Planet collides this will return true and also sets a collision object
     */
     collide: function () {       
-        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Meteor){   
+        if(this.game.gameEngine.collisionObject(this) instanceof Meteor){   
               
-            this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+            this.collided_with = this.game.gameEngine.collisionObject(this);
 
             return true;
       }    
@@ -92,16 +92,16 @@ Planet.prototype = {
     update: function() {
 
         if(this.live <= 0){          
-            this.game.instance.gameEngine.gameEngine.explode(this, this.game, 7);  
+            this.game.gameEngine.explode(this, this.game, 7);  
           
         }else{  
 
-            let distance = this.game.instance.gameEngine.gameEngine.distanceBetweenPoints(
+            let distance = this.game.gameEngine.distanceBetweenPoints(
                 this.x, this.y, this.game.world.width/2, this.game.world.height/2
             );
 
             if(distance > 10){
-                this.x += this.velocity_x;                 
+                this.x += this.velocity_x;                   
             }      
             
             if(this.collide()){        
@@ -111,9 +111,9 @@ Planet.prototype = {
                 }        
                 
                 // Substract from live
-                this.game.instance.gameEngine.gameEngine.subtractFromLive(this);   
+                this.game.gameEngine.subtractFromLive(this);   
 
-                this.hit = true;
+                this.hit = true;                               
             }
 
             // Blink to show being hit      

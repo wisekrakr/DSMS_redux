@@ -4,8 +4,9 @@
  * but it also defines the ButtonInput class, which is used for tracking button states.
  */
 
-const Controller = function() {
+const Controller = function(game) {
     
+    this.game  = game;
     this.left  = new Controller.ButtonInput();
     this.right = new Controller.ButtonInput();
     this.up    = new Controller.ButtonInput();   
@@ -27,19 +28,17 @@ const Controller = function() {
             this.right.getInput(down); 
             break;  
         case 80:     // P to pause        
-            this.paused = true;            
+            this.paused = true;  
+            this.game.gameAudio.play(700, 0.3, "sine").setFrequency(550, 0.3).stop(0.8);        
             break;
         case 27:  // Escape to unpause
             this.paused = false;
+            this.game.gameAudio.play(550, 0.3, "sine").setFrequency(700, 0.3).stop(0.8);  
             break;
         default:
             console.error(key_code + ": This key is not yet defined")     
       }
     }; 
-
-
-
-  
 };
 
 Controller.prototype = {

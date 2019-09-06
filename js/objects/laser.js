@@ -25,7 +25,7 @@ const Laser = function(game,x, y, a, parent) {
     this.parent     = parent;
     this.game       = game;  
 
-    this.game.instance.gameEngine.gameEngine.addObject(this);
+    this.game.gameEngine.addObject(this);
 };
 
 Laser.prototype = {
@@ -36,8 +36,8 @@ Laser.prototype = {
     * If the laser collides this will return true and also sets a collision object
     */
     collide: function () {       
-        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid ||
-            this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player) {
+        if(this.game.gameEngine.collisionObject(this) instanceof Asteroid ||
+            this.game.gameEngine.collisionObject(this) instanceof Player) {
 
           return true;
         }      
@@ -58,7 +58,7 @@ Laser.prototype = {
          
         if(this.collide()){
            
-            this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
+            this.game.gameEngine.explode(this, this.game, 3);
                 
         }else{
             //Set the appropriate speed and direction
@@ -68,7 +68,7 @@ Laser.prototype = {
             if(this.lifeTime > 0){
                 this.lifeTime--;      
             }else{
-                this.game.instance.gameEngine.gameEngine.removeObject(this);
+                this.game.gameEngine.removeObject(this);
             }
         }        
     },   

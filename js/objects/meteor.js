@@ -25,7 +25,7 @@ const Meteor = function(game,x, y) {
     this.offset     = [];  
     this.game       = game;  
 
-    this.game.instance.gameEngine.gameEngine.addObject(this);
+    this.game.gameEngine.addObject(this);
 
     //Create the vertex offset array
     for(let i = 0; i < this.vertices; i++){
@@ -44,12 +44,12 @@ Meteor.prototype = {
     * If the meteor collides this will return true and also sets a collision object
     */
     collide: function () {       
-        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Planet){   
+        if(this.game.gameEngine.collisionObject(this) instanceof Enemy || 
+          this.game.gameEngine.collisionObject(this) instanceof Player || 
+          this.game.gameEngine.collisionObject(this) instanceof Laser || 
+          this.game.gameEngine.collisionObject(this) instanceof Planet){   
               
-            this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+            this.collided_with = this.game.gameEngine.collisionObject(this);
 
             return true;
       }    
@@ -57,13 +57,13 @@ Meteor.prototype = {
     },
 
     behavior: function(){
-        for(let target of this.game.instance.gameEngine.gameEngine.gameObjects){    
+        for(let target of this.game.gameEngine.gameObjects){    
           if(target instanceof Planet){           
   
             if(this.target !== null){
-              if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < 800){
+              if(this.game.gameEngine.distanceBetweenObjects(this,target) < 800){
   
-                this.angle = this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
+                this.angle = this.game.gameEngine.angleBetweenObjects(this,target); 
             
               }
             }
@@ -81,11 +81,11 @@ Meteor.prototype = {
         if(this.collide()){
             // Get destroyed.
             if(this.collided_with instanceof Planet){
-                this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
+                this.game.gameEngine.explode(this, this.game, 3);
                   
                 this.game.world.score -= 20;
             }else if(this.collided_with instanceof Player){
-                this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);
+                this.game.gameEngine.explode(this, this.game, 3);
 
                 this.velocity_x = 0;
                 this.velocity_y = 0;  
@@ -97,7 +97,7 @@ Meteor.prototype = {
 
             // // Bounce of collided object
             // else{
-            //     this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,this.collided_with);
+            //     this.angle = -this.game.gameEngine.angleBetweenObjects(this,this.collided_with);
 
             //     this.velocity_x = -this.velocity_x * AS_SPEED;
             //     this.velocity_y = -this.velocity_y * AS_SPEED;  

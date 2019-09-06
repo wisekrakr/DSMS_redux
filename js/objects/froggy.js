@@ -22,7 +22,7 @@ const Froggy = function(game,x ,y) {
     this.rotation   = 0;    
     this.game       = game;
     
-    this.game.instance.gameEngine.gameEngine.addObject(this);
+    this.game.gameEngine.addObject(this);
 };
 
 Froggy.prototype = {
@@ -53,10 +53,10 @@ Froggy.prototype = {
     * If the enemy collides this will return true and also sets a collision object
     */
     collide: function () {       
-        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
-            this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid){       
+        if(this.game.gameEngine.collisionObject(this) instanceof Enemy || 
+            this.game.gameEngine.collisionObject(this) instanceof Asteroid){       
                 
-                this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+                this.collided_with = this.game.gameEngine.collisionObject(this);
 
             return true;
         }    
@@ -68,18 +68,18 @@ Froggy.prototype = {
      */
     behavior: function(){
 
-        for(let target of this.game.instance.gameEngine.gameEngine.gameObjects){    
+        for(let target of this.game.gameEngine.gameObjects){    
           if(target instanceof Player){    
 
             //Go towards Player
             if(this.target !== null){
-                if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < 250){
+                if(this.game.gameEngine.distanceBetweenObjects(this,target) < 250){
   
-                    this.angle = this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
+                    this.angle = this.game.gameEngine.angleBetweenObjects(this,target); 
                      
                     this.following = true;
 
-                    if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < target.width * 2){
+                    if(this.game.gameEngine.distanceBetweenObjects(this,target) < target.width * 2){
                         this.x += this.velocity_x * Math.cos(-this.angle);
                         this.y += this.velocity_y * Math.sin(-this.angle);
                     }
@@ -96,9 +96,9 @@ Froggy.prototype = {
             }else if(target instanceof Enemy){                
     
                 if(this.target !== null){
-                    if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < (this.width + target.width) + 20){
+                    if(this.game.gameEngine.distanceBetweenObjects(this,target) < (this.width + target.width) + 20){
     
-                        this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
+                        this.angle = -this.game.gameEngine.angleBetweenObjects(this,target); 
                     }
                 }
             }
@@ -124,7 +124,7 @@ Froggy.prototype = {
                  
                 }  
 
-                this.game.instance.gameEngine.gameEngine.explode(this, this.game, 3);                
+                this.game.gameEngine.explode(this, this.game, 3);                
                 
                 this.game.world.froggy = null;                       
             }                               

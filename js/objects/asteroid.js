@@ -25,7 +25,7 @@ const Asteroid = function(game,x, y, w, h) {
     this.offset     = [];      
     this.game       = game;  
 
-    this.game.instance.gameEngine.gameEngine.addObject(this);
+    this.game.gameEngine.addObject(this);
 
     //Create the vertex offset array
     for(let i = 0; i < this.vertices; i++){
@@ -43,11 +43,11 @@ Asteroid.prototype = {
      * If the Asteroid collides: this will return true and also sets a collision object
      */
     collide: function () {       
-        if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Enemy || 
-            this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
-            this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Laser){
+        if(this.game.gameEngine.collisionObject(this) instanceof Enemy || 
+            this.game.gameEngine.collisionObject(this) instanceof Player || 
+            this.game.gameEngine.collisionObject(this) instanceof Laser){
           
-            this.collided_with = this.game.instance.gameEngine.gameEngine.collisionObject(this);
+            this.collided_with = this.game.gameEngine.collisionObject(this);
 
           return true;
         }
@@ -62,7 +62,7 @@ Asteroid.prototype = {
          
         if(this.collide()){
             //Check what kind of object and either explode or blow in pieces   
-            this.game.instance.gameEngine.gameEngine.explode(this, this.game, 5);
+            this.game.gameEngine.explode(this, this.game, 5);
 
         }else{
              //Set the appropriate speed and direction 

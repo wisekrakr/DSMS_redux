@@ -1,4 +1,3 @@
-/* David Damian 15/08/2019 */
 
 /**
  * Holds the game world. Creates a new instance of the Game Engine
@@ -11,17 +10,18 @@ const Game = function(engine) {
   /**
    * This instance of the game's spaceEngine and gameEngine
    */
-  this.instance = {
-    
-    gameEngine: new GameEngine(),      
-    spaceEngine: engine      
-  };
+ 
+  this.gameEngine= new GameEngine();    
+  this.spaceEngine= engine;
 
   this.world = new World(this);
 
   this.width = this.world.width;
   this.height = this.world.height;
-   
+
+  this.audio = new AudioContext();
+  this.gameAudio = new GameAudio(new AudioContext());
+
   /**
    * Set a flickering effect with an array of colors
    * 
@@ -42,7 +42,7 @@ const Game = function(engine) {
         x = Math.floor(Math.random()* this.world.width);
         y = Math.floor(Math.random()* this.world.height);
         
-      }while(this.instance.gameEngine.gameEngine.
+      }while(this.gameEngine.
         distanceBetweenPoints(this.world.player.x, this.world.player.y, x,y) < 
         this.world.player.width + 200);
 
@@ -62,7 +62,7 @@ const Game = function(engine) {
       if(object.width/3 > 5 && object.height/3 > 5){
         new Asteroid(this, object.x, object.y, object.width/3, object.height/3);
       }else{
-        this.instance.gameEngine.gameEngine.removeObject(object); 
+        this.gameEngine.removeObject(object); 
       }
     }    
   },
@@ -78,7 +78,7 @@ const Game = function(engine) {
         x = Math.floor(Math.random()* this.world.width);
         y = Math.floor(Math.random()* this.world.height);
         
-      }while(this.instance.gameEngine.gameEngine.
+      }while(this.gameEngine.
         distanceBetweenPoints(this.world.player.x, this.world.player.y, x,y) < 
         this.world.player.width + 200);
 
@@ -97,7 +97,7 @@ const Game = function(engine) {
         x = Math.floor(Math.random()* this.world.width);
         y = Math.floor(Math.random()* this.world.height);     
 
-      }while(this.instance.gameEngine.gameEngine.
+      }while(this.gameEngine.
         distanceBetweenPoints(this.world.player.x, this.world.player.y, x,y) < 
         this.world.player.width + 200);
 
@@ -112,7 +112,8 @@ const Game = function(engine) {
     
     for(let i = 1; i > this.world.planets.size; i--){      
 
-      this.world.planets.add(new Planet(this));     
+      this.world.planets.add(new Planet(this));      
+      
     }    
   }, 
   
@@ -122,40 +123,57 @@ const Game = function(engine) {
    * 
    * @param  {} object exploding game object
    */
-  this.scoreAndObjectHandler = function(object){    
+  this.scoreAndObjectHandler = function(object){ 
+     
     
     // Handle exploding objects
     if(object.tag !== 'Debris'){             
       
-      if(object.explode_time <= 0){   
+      if(object.explode_time <= 0){          
+
         
+        //beep boop
+        // this.gameAudio.play(100, 0.3, "sine").setFrequency(150, 0.3).stop(0.8);
+
+        this.gameAudio.play(300, 0.2, "sine").stop(0.1);    
+        this.gameAudio.play(280, 0.2, "sine", 0.1).stop(0.2);     
+        this.gameAudio.play(260, 0.2, "sine", 0.2).stop(0.3); 
+        this.gameAudio.play(240, 0.2, "sine", 0.3).stop(0.4);     
+        this.gameAudio.play(200, 0.2, "sine", 0.4).stop(0.6);
+       
+
+        //Something goes wrong
+        // this.gameAudio.play(150, 0.1, "sine").stop(0.3);    
+        // this.gameAudio.play(400, 0.25, "sine", 0.3).stop(0.5);     
+        // this.gameAudio.play(280, 0.3, "sine", 0.5).stop(0.7); 
+
         switch(object.tag){
           case "Asteroid":
             this.world.asteroids.delete(object);
             this.splitObject(object);
-            this.instance.gameEngine.gameEngine.removeObject(object);
+            this.gameEngine.removeObject(object);
   
             this.world.score += (object.width + object.height) / 2;
             break;
           case "Enemy":
             this.world.enemies.delete(object);
-            this.instance.gameEngine.gameEngine.removeObject(object);   
+            this.gameEngine.removeObject(object);   
   
             this.world.score += (object.width + object.height) / 2;
             break;
           case "Laser": case "Froggy":
-            this.instance.gameEngine.gameEngine.removeObject(object);    
+            this.gameEngine.removeObject(object);    
             break;
           case "Meteor":
             this.world.meteor_shower.delete(object);
-            this.instance.gameEngine.gameEngine.removeObject(object);   
-            console.log("removing meteor");
+            this.gameEngine.removeObject(object);   
+        
             this.world.score += 100;  
             break;
           case "Planet":           
             this.splitObject(object);
-            this.instance.gameEngine.gameEngine.removeObject(object);
-            console.log("removing planet");
+            this.gameEngine.removeObject(object);
+      
             this.world.score -= 5000;
             break;
         }    
@@ -179,7 +197,7 @@ const Game = function(engine) {
     }      
    
     this.world.update();  
-    this.instance.gameEngine.update(); 
+    this.gameEngine.update(); 
 
     if(this.world.player !== null){
       this.setAsteroidBelt();

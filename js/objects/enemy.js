@@ -27,7 +27,7 @@ const Enemy = function(game, x, y) {
     this.canShoot   = false;    
     this.game       = game;  
   
-    this.game.instance.gameEngine.gameEngine.addObject(this);  
+    this.game.gameEngine.addObject(this);  
   };
   
   Enemy.prototype = {
@@ -42,30 +42,27 @@ const Enemy = function(game, x, y) {
       "bleep blorp zorg",
       "shinde kudasai",
       "amaré tu muerte",
-      "oyisithutha ofile",
-      "ich werde dich erschießen",
-      "lelőlek",
-      "zastrzelę cię",
-      "nitakupiga",
-      "я пристрелю тебя",
-      "ik zal je neerschieten",
-      "ti sparaghju"
+      "Where's your Multipass",
+      "By Grabthar’s hammer",
+      "...I've seen things...",
+      "weehoo!",
+      "To infinity and beyond"
     ],     
     send_message:false,
-       
+    audio: new AudioContext(), 
     
     /**
      * Function to angle towards the player and away from asteroids, when in range 
      */
     behavior: function(){
-      for(let target of this.game.instance.gameEngine.gameEngine.gameObjects){    
+      for(let target of this.game.gameEngine.gameObjects){    
         if(target instanceof Player){     
 
           if(this.target !== null){
-            if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < this.range &&
-            this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) > target.width * 2){
+            if(this.game.gameEngine.distanceBetweenObjects(this,target) < this.range &&
+            this.game.gameEngine.distanceBetweenObjects(this,target) > target.width * 2){
 
-              this.angle = this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
+              this.angle = this.game.gameEngine.angleBetweenObjects(this,target); 
 
               this.canShoot = true;
         
@@ -78,9 +75,9 @@ const Enemy = function(game, x, y) {
         }else if(target instanceof Asteroid){
 
           if(this.target !== null){
-            if(this.game.instance.gameEngine.gameEngine.distanceBetweenObjects(this,target) < (this.width + target.width) + 20){
+            if(this.game.gameEngine.distanceBetweenObjects(this,target) < (this.width + target.width) + 20){
 
-              this.angle = -this.game.instance.gameEngine.gameEngine.angleBetweenObjects(this,target); 
+              this.angle = -this.game.gameEngine.angleBetweenObjects(this,target); 
             }
           }
         }
@@ -94,7 +91,7 @@ const Enemy = function(game, x, y) {
     shootLaser: function(){
       
       // Create laser object and fire it      
-      let time = this.game.instance.spaceEngine.clock/1000;
+      let time = this.game.spaceEngine.clock/1000;
 
       if(this.lastShot === 0){
         this.lastShot = time;
@@ -113,6 +110,12 @@ const Enemy = function(game, x, y) {
           );
 
           this.lastShot = time;
+
+          // Laser sound
+          this.game.gameAudio.play(300, 0.1, "sine").stop(0.1);    
+          this.game.gameAudio.play(350, 0.1, "sine", 0.1).stop(0.2);     
+          this.game.gameAudio.play(400, 0.1, "sine", 0.2).stop(0.3);  
+          this.game.gameAudio.play(450, 0.1, "sine", 0.3).stop(0.4);   
         }
       }
     }, 
@@ -121,9 +124,9 @@ const Enemy = function(game, x, y) {
     * If the enemy collides this will return true and also sets a collision object
     */
     collide: function () {       
-      if(this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Asteroid || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Player || 
-          this.game.instance.gameEngine.gameEngine.collisionObject(this) instanceof Meteor){            
+      if(this.game.gameEngine.collisionObject(this) instanceof Asteroid || 
+          this.game.gameEngine.collisionObject(this) instanceof Player || 
+          this.game.gameEngine.collisionObject(this) instanceof Meteor){            
             return true;
       }    
       return false;         
@@ -150,7 +153,7 @@ const Enemy = function(game, x, y) {
           }     
         }
       }else{
-          this.game.instance.gameEngine.gameEngine.explode(this, this.game,5);
+          this.game.gameEngine.explode(this, this.game,5);
       }
     },   
   
