@@ -124,7 +124,7 @@ Froggy.prototype = {
                  
                 }  
 
-                this.game.gameEngine.explode(this, this.game, 3);                
+                this.game.gameEngine.explode(this, this.game, 2);                
                 
                 this.game.world.froggy = null;                       
             }                               

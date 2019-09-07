@@ -62,7 +62,7 @@ Asteroid.prototype = {
          
         if(this.collide()){
             //Check what kind of object and either explode or blow in pieces   
-            this.game.gameEngine.explode(this, this.game, 5);
+            this.game.gameEngine.explode(this, this.game, 3);
 
         }else{
              //Set the appropriate speed and direction 

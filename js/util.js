@@ -8,8 +8,8 @@ const FPS = 60; // 60/1000 (60 frames per second)
 
 const EXPLODE_TIME = Math.ceil(0.12 * FPS); //Duration of explosion animation
 const DSMS_HIGH_SCORES = "dsms_highscores";
-const ASTEROID_NUMBER = 10; //Begin stage: 5 asteroids
-const ENEMY_NUMBER = 2; //Begin stage: 1 enemy 
+const ASTEROID_NUMBER = 7; 
+const ENEMY_NUMBER = 1; 
 
 /* Player constants */
 
@@ -25,8 +25,8 @@ const BLINK_TIME = 4; //Blinking animation after death
 
 const ENEMY_WIDTH = 30;
 const ENEMY_HEIGHT = 10; 
-const ENEMY_SPEED = 1.2 * FPS;
-const ENEMY_TURN_SPEED = 4 * FPS; // Speed to turn towards a target
+const ENEMY_SPEED = 1.5 * FPS;
+const ENEMY_TURN_SPEED = 6 * FPS; // Speed to turn towards a target
 const ENEMY_RANGE = 350; // Radius range for the enemy to attack in
 
 /* Laser constants */
@@ -41,8 +41,8 @@ const FIRE_RATE = 0.03 * FPS;
 
 const AS_WIDTH = 40; // Asteroid radius
 const AS_HEIGHT = 40; // Asteroid height
-const AS_SPEED = 0.6 * FPS;// Asteroid speed
-const AS_ROTATE_SPEED = 0.03 * FPS;// Asteroid rotation speed
+const AS_SPEED = 1.3 * FPS;// Asteroid speed
+const AS_ROTATE_SPEED = 0.1 * FPS;// Asteroid rotation speed
 const VERTICES = 10;// Asteroid number of vertices of polygon
 const AS_RIDGE = 0.3;// Number of Ridges on an Asteroid
 

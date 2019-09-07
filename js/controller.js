@@ -11,7 +11,7 @@ const Controller = function(game) {
     this.right = new Controller.ButtonInput();
     this.up    = new Controller.ButtonInput();   
     this.paused= false;
-  
+     
     this.keyDownUp = function(type, key_code) {
   
       let down = (type == "keydown") ? true : false;
@@ -27,13 +27,27 @@ const Controller = function(game) {
         case 68: case 39: //D and Right Arrow
             this.right.getInput(down); 
             break;  
-        case 80:     // P to pause        
-            this.paused = true;  
-            this.game.gameAudio.play(700, 0.3, "sine").setFrequency(550, 0.3).stop(0.8);        
+        case 80:     // P to pause   
+            if(this.game.world.start_game && !this.game.world.win){     
+                this.paused = true;  
+                this.game.gameAudio.play(700, 0.3, "sine").setFrequency(550, 0.3).stop(0.8); 
+            }       
             break;
         case 27:  // Escape to unpause
-            this.paused = false;
-            this.game.gameAudio.play(550, 0.3, "sine").setFrequency(700, 0.3).stop(0.8);  
+            if(this.game.world.start_game && !this.game.world.win){
+                this.paused = false;
+                this.game.gameAudio.play(550, 0.3, "sine").setFrequency(700, 0.3).stop(0.8); 
+            } 
+            break;
+        case 32:  // Space to Start the Game
+            if(!this.game.world.start_game){
+                this.game.world.start_game = true;   
+            }
+            break;
+        case 8: // Back to Start Menu            
+            this.game.world.start_game = false; 
+            this.game.world.win = false;
+            this.game.world.destroyWorld();
             break;
         default:
             console.error(key_code + ": This key is not yet defined")     

@@ -6,15 +6,15 @@
  * @param  {} x position on x-axis
  * @param  {} y position on y-axis
  */
-const Enemy = function(game, x, y) {
+const Enemy = function(game, x, y, w, h) {
 
     this.tag        = "Enemy";
     this.tag_nr      = Math.random();
-    this.color      = "rgb(0,255,128)";
-    this.width      = ENEMY_WIDTH;   
-    this.height     = ENEMY_HEIGHT; 
-    this.init_width = ENEMY_WIDTH;
-    this.init_height= ENEMY_HEIGHT;     
+    this.color      = game.colorPicker(["#e03e69","#20b3a2", "#657a87", "#935f7b", "#b5c68a"]);
+    this.width      = w;   
+    this.height     = h; 
+    this.init_width = w;
+    this.init_height= h;     
     this.velocity_x = Math.random() * ENEMY_SPEED / FPS;
     this.velocity_y = Math.random() * ENEMY_SPEED / FPS;
     this.x          = x;
@@ -34,13 +34,13 @@ const Enemy = function(game, x, y) {
   
     constructor : Enemy,   
     explode_time: EXPLODE_TIME,
-    lastShot: 0,
+    lastShot: 0,                        
     fireRate: FIRE_RATE,
     my_messages: [
       "I will shoot you!",
       "come BACK here!",
       "bleep blorp zorg",
-      "shinde kudasai",
+      "shinde kudasai",                    
       "amaré tu muerte",
       "Where's your Multipass",
       "By Grabthar’s hammer",
@@ -153,7 +153,7 @@ const Enemy = function(game, x, y) {
           }     
         }
       }else{
-          this.game.gameEngine.explode(this, this.game,5);
+          this.game.gameEngine.explode(this, this.game,2);
       }
     },   
   

@@ -56,12 +56,15 @@ Meteor.prototype = {
       return false;      
     },
 
+    /**
+     * Function to angle towards the Planet, when in range 
+     */
     behavior: function(){
         for(let target of this.game.gameEngine.gameObjects){    
           if(target instanceof Planet){           
   
             if(this.target !== null){
-              if(this.game.gameEngine.distanceBetweenObjects(this,target) < 800){
+              if(this.game.gameEngine.distanceBetweenObjects(this,target) < 1000){
   
                 this.angle = this.game.gameEngine.angleBetweenObjects(this,target); 
             
@@ -81,11 +84,11 @@ Meteor.prototype = {
         if(this.collide()){
             // Get destroyed.
             if(this.collided_with instanceof Planet){
-                this.game.gameEngine.explode(this, this.game, 3);
+                this.game.gameEngine.explode(this, this.game, 2);
                   
                 this.game.world.score -= 20;
             }else if(this.collided_with instanceof Player){
-                this.game.gameEngine.explode(this, this.game, 3);
+                this.game.gameEngine.explode(this, this.game, 2);
 
                 this.velocity_x = 0;
                 this.velocity_y = 0;  
@@ -106,20 +109,14 @@ Meteor.prototype = {
             this.x -= this.velocity_x * Math.cos(this.angle); 
             this.y -= this.velocity_y * Math.sin(this.angle); 
 
-            let debrisParts = [];
-            for (let i = debrisParts.length; i < 2; i++) {      
-                debrisParts[i] = new Debris(this.game, 
-                    this.x, this.y, 
-                    this.width / i+1, this.height / i+1, 
-                    this.color
-                    );
-    
-            } 
-        }
-        
-        
+            this.color = this.game.colorPicker([
+              "rgba(221,51,9, 0.7)",
+              "rgba(227,158,3, 0.7)",
+              "rgba(225,231,5, 0.7)",
+              "rgba(200,250,189, 0.7)"
+            ]);
+        } 
     },    
-
 };  
 
 

@@ -23,7 +23,7 @@ window.addEventListener("load", function() {
     let render = function() {
   
         display.fill(game.world.background_color);// Clear background to game's background color.
-        
+        //  display.context.clearRect(0,0,game.world.width,game.world.height);
         // Give gameobjects their shape and color        
 
         for(let object of game.gameEngine.gameObjects){             
@@ -45,8 +45,11 @@ window.addEventListener("load", function() {
                 case 'Laser': case 'Debris': 
                     display.drawCircle(object, true);
                     break;
-                case 'Asteroid': case 'Meteor':                  
-                    display.drawPolygon(object);                    
+                case 'Asteroid':                 
+                    display.drawPolygon(object, false);                    
+                    break;
+                case 'Meteor':  
+                    display.drawPolygon(object, true);      
                     break;
                 case 'Enemy': case 'Froggy':                   
                     display.drawRectangle(object);                    
@@ -64,11 +67,11 @@ window.addEventListener("load", function() {
      * Player movement, removing objects and clearing of canvas is also done here.
      */
     let update = function() {   
-         
+        
         // Player Controls
         if (controller.left.active)  { game.world.player.moveLeft();}
         if (controller.right.active) { game.world.player.moveRight(); }
-        if (controller.up.active)    { game.world.player.forward();  }        
+        if (controller.up.active)    { game.world.player.forward();  }     
         
              
         // Remove gameobjects
@@ -76,22 +79,16 @@ window.addEventListener("load", function() {
             for(let sub of game.gameEngine.toBeRemoved){   
                 let object = sub;                
                 
-                if(object !== undefined){
-                   
-                    display.context.clearRect(
-                        object.x,
-                        object.y,
-                        object.width,
-                        object.height
-                    );
+                if(object !== undefined){                   
+                    display.context.clearRect(object.x,object.y,object.width,object.height);
 
                     game.gameEngine.toBeRemoved.delete(object);
                 }
             }
         }
 
-        if(!controller.paused){
-            game.update();  
+        if(!controller.paused && game.world.start_game && !game.world.win){
+            game.update();              
         }
     };
    
@@ -104,7 +101,7 @@ window.addEventListener("load", function() {
       display.resize(
           document.documentElement.clientWidth - 32, 
           document.documentElement.clientHeight - 32, 
-          game.height / game.width
+          game.world.height / game.world.width
       );
       display.render();
 
@@ -125,15 +122,16 @@ window.addEventListener("load", function() {
 
     /* Every pixel must be the same
     size as the world dimensions to properly scale the graphics. */
-    display.buffer.canvas.width = game.width;
-    display.buffer.canvas.height = game.height; 
+    display.buffer.canvas.width = game.world.width;
+    display.buffer.canvas.height = game.world.height; 
   
     window.addEventListener("resize",  resize);
     window.addEventListener("keydown", keyDownUp);
     window.addEventListener("keyup",   keyDownUp); 
     
     resize(); 
-
-    engine.start(); // Start the game       
+    
+    engine.start(); // Start the game     
+    
 });
   

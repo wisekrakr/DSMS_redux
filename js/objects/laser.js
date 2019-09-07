@@ -21,7 +21,7 @@ const Laser = function(game,x, y, a, parent) {
     this.angle      = a;     
     this.x          = x;
     this.y          = y;
-    this.lifeTime   = 1 * FPS;
+    this.lifeTime   = 1.3 * FPS;
     this.parent     = parent;
     this.game       = game;  
 
@@ -58,7 +58,7 @@ Laser.prototype = {
          
         if(this.collide()){
            
-            this.game.gameEngine.explode(this, this.game, 3);
+            this.game.gameEngine.explode(this, this.game, 2);
                 
         }else{
             //Set the appropriate speed and direction

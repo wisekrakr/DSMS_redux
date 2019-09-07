@@ -92,7 +92,7 @@ Planet.prototype = {
     update: function() {
 
         if(this.live <= 0){          
-            this.game.gameEngine.explode(this, this.game, 7);  
+            this.game.gameEngine.explode(this, this.game, 5);  
           
         }else{  
 

@@ -16,11 +16,8 @@ const Game = function(engine) {
 
   this.world = new World(this);
 
-  this.width = this.world.width;
-  this.height = this.world.height;
-
   this.audio = new AudioContext();
-  this.gameAudio = new GameAudio(new AudioContext());
+  this.gameAudio = new GameAudio(this.audio);
 
   /**
    * Set a flickering effect with an array of colors
@@ -82,7 +79,7 @@ const Game = function(engine) {
         distanceBetweenPoints(this.world.player.x, this.world.player.y, x,y) < 
         this.world.player.width + 200);
 
-      this.world.enemies.add(new Enemy(this, x, y));
+      this.world.enemies.add(new Enemy(this, x, y, ENEMY_WIDTH, ENEMY_HEIGHT));
     }
   }, 
   
@@ -98,8 +95,8 @@ const Game = function(engine) {
         y = Math.floor(Math.random()* this.world.height);     
 
       }while(this.gameEngine.
-        distanceBetweenPoints(this.world.player.x, this.world.player.y, x,y) < 
-        this.world.player.width + 200);
+        distanceBetweenPoints(this.world.width/2, this.world.height/2, x,y) < 
+        700);
 
       this.world.meteor_shower.add(new Meteor(this, x, y));     
     }    
@@ -123,8 +120,12 @@ const Game = function(engine) {
    * 
    * @param  {} object exploding game object
    */
-  this.scoreAndObjectHandler = function(object){ 
-     
+  this.scoreAndObjectHandler = function(object){      
+
+    if(this.world.score > parseInt(localStorage.getItem(DSMS_HIGH_SCORES))){       
+
+        localStorage.setItem(DSMS_HIGH_SCORES, this.world.score);
+    }      
     
     // Handle exploding objects
     if(object.tag !== 'Debris'){             
@@ -153,13 +154,13 @@ const Game = function(engine) {
             this.splitObject(object);
             this.gameEngine.removeObject(object);
   
-            this.world.score += (object.width + object.height) / 2;
+            this.world.score += (object.width + object.height) * Math.ceil(this.world.time_keeper/10);
             break;
           case "Enemy":
             this.world.enemies.delete(object);
             this.gameEngine.removeObject(object);   
   
-            this.world.score += (object.width + object.height) / 2;
+            this.world.score += (object.width + object.height) * Math.ceil(this.world.time_keeper/10);
             break;
           case "Laser": case "Froggy":
             this.gameEngine.removeObject(object);    
@@ -168,7 +169,7 @@ const Game = function(engine) {
             this.world.meteor_shower.delete(object);
             this.gameEngine.removeObject(object);   
         
-            this.world.score += 100;  
+            this.world.score += 1000;  
             break;
           case "Planet":           
             this.splitObject(object);
@@ -181,20 +182,12 @@ const Game = function(engine) {
     }    
   },  
   
-  
   /**
    * Update the world and the Game Engine.
    * We can keep track of asteroids and enemies to add new ones
    * when one gets removed.
    */
-  this.update = function() {   
-
-    localStorage.setItem(DSMS_HIGH_SCORES, 0);      
-
-    if(this.score > parseInt(localStorage.getItem(DSMS_HIGH_SCORES))){       
-
-        localStorage.setItem(DSMS_HIGH_SCORES, this.world.score);
-    }      
+  this.update = function() {      
    
     this.world.update();  
     this.gameEngine.update(); 
