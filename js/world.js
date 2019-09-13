@@ -2,7 +2,7 @@ const World = function(game){
     
     this.tag = "World";
     this.fps = FPS;
-    this.background_color= "#000000" //'#ffffff00';
+    this.background_color= "#000000" 
 
     this.friction= 0.9;  
 
@@ -26,7 +26,7 @@ const World = function(game){
     this.meteor_shower=new Set();
     this.planets=new Set();
 
-    this.letItRain= false;
+    this.let_it_rain= false;
     this.planet=false;    
     this.froggy=null;
     this.boss=null;
@@ -38,6 +38,7 @@ const World = function(game){
     this.game = game;
 
     this.start_game= false;
+    this.end_game = false;
     this.win = false;
 }
  
@@ -51,11 +52,7 @@ World.prototype = {
         let new_distance = this.game.gameEngine.distanceBetweenPoints(
             object.x, object.y, this.width/2, this.height/2
         );
-        
-        let angle = Math.atan2(this.height/2 - object.y, this.width/2 - object.x);
-        
-        
-       
+              
         if(new_distance > this.distance){  
             let diff = new_distance - this.distance;   
             
@@ -119,8 +116,15 @@ World.prototype = {
      * Keeps track of the high score.
      */
     levelProgression : function(){    
+
+        localStorage.setItem(DSMS_TIME_TRIAL, localStorage.getItem(DSMS_TIME_TRIAL)!==null?localStorage.getItem(DSMS_TIME_TRIAL):0);    
+
+        if(this.time_keeper > parseInt(localStorage.getItem(DSMS_TIME_TRIAL))){       
+
+            localStorage.setItem(DSMS_TIME_TRIAL, this.time_keeper);
+        }     
           
-        
+        //Game will follow time and initialize certain aspect of the game at certain times.
         switch(Math.round(this.time_keeper)){   
             case 1: case 4:
                 newGameSound(this.game.gameAudio); 
@@ -129,18 +133,18 @@ World.prototype = {
             case 8: case 11:
                 this.messenger("ENEMIES destroy ASTEROIDS, and VICE VERSA", this.worldMessage); 
                 break;    
-            case 16: case 19:
+            case 17: case 20:
                 this.messenger("SURVIVE for 300 seconds and get the Highest Score", this.worldMessage); 
                 break;  
-            case 40:
-                this.letItRain = true;          
-                this.messenger("Protect the Planet from Meteors", this.worldMessage); 
+            case 30:
+                this.let_it_rain = true;          
+                this.messenger("Protect the Planet from falling Asteroids", this.worldMessage); 
                 newStageSound(this.game.gameAudio); 
                 break;        
             case 70:
-                this.letItRain = false;  
+                this.let_it_rain = false;  
                 if(this.froggy === null){
-                    //Create a Froggy to escort to a safe haven at a random position
+                    //Create a Froggy to escort it as long as possible
                     this.froggy = new Froggy(this.game, 0, Math.random() * this.height); 
                     this.messenger("Time Trail: A New Escort Mission!", this.worldMessage); 
                     newStageSound(this.game.gameAudio);                                          
@@ -151,48 +155,43 @@ World.prototype = {
                 break;
             case 130:
                 if(this.froggy === null){
-                    //Create a Froggy to escort to a safe haven at a random position
+                   //Create a Froggy to escort it as long as possible
                     this.froggy = new Froggy(this.game, 0, Math.random() * this.height); 
                     this.messenger("Time Trail: Escort Mission Strikes Again!", this.worldMessage); 
                     newStageSound(this.game.gameAudio);                                          
                 }                 
                 break;
-            case 180:
+            case 180:             
                 this.number_asteroids = ASTEROID_NUMBER*2;  
-                this.letItRain = true;          
-                this.messenger("Protect the Planet from Meteors... AGAIN!", this.worldMessage); 
+                this.let_it_rain = true;          
+                this.messenger("Protect the Planet from falling Asteroids", this.worldMessage); 
                 newStageSound(this.game.gameAudio);                
                 break;
             case 215:
-                this.letItRain = false;          
+                this.let_it_rain = false;                      
                 break;
             case 220:         
                 if(this.froggy === null){
-                    //Create a Froggy to escort to a safe haven at a random position
+                    //Create a Froggy to escort it as long as possible
                     this.froggy = new Froggy(this.game, 0, Math.random() * this.height);  
                     this.messenger("Time Trail: Return of the Escort Mission!", this.worldMessage);
                     newStageSound(this.game.gameAudio);              
                 }
                 break;       
-            case 240:
+            case 260:
                 this.number_asteroids = ASTEROID_NUMBER * 3;
                 this.number_enemies = ENEMY_NUMBER * 3;                
                 break;
-            case 300:
-                //BOSS BATTLE AND THEN YOU WIN
-                // if(this.boss === null){
-                //     this.boss = new Enemy(this.game, 0, Math.random() * this.height, ENEMY_WIDTH * 10, ENEMY_HEIGHT *20);
-                //     this.messenger("BOSS BATTLE: ", this.worldMessage);
-                //     newStageSound(this.game.gameAudio);         
-                // }
-                this.win = true;
-                
-                break;            
+            case 300:              
+                this.end_game = true;   
+                newStageSound(this.game.gameAudio);              
+                break;    
+            
         }
     },  
     
     /**
-   * This will run the game mechanics. Creates player and keeps track of time, live and death.
+   * This will run the game mechanics. Creates player and keeps track of time, lhealthive and death.
    * This will run the outOfBounds and scoreAndObjectHandler functions.
    * This will also hold special events that happen during the game. 
    */
@@ -213,7 +212,7 @@ World.prototype = {
                 
                 this.time_keeper += delta;
                 
-                if(this.player.live <= 0){
+                if(this.player.health <= 0){
                     // GAME OVER
                     this.game.gameEngine.removeObject(this.player);                 
                                         
@@ -239,7 +238,7 @@ World.prototype = {
 
                     // case 25 of levelProgression: Create Meteors
 
-                    if(this.letItRain){
+                    if(this.let_it_rain){
                                     
                         this.game.setPlanets();
                         
@@ -269,7 +268,7 @@ World.prototype = {
                             }else{
                                 this.planets.clear();
                                 this.game.gameEngine.removeObject(planet);
-                            }
+                            }                            
                         }
                     }
                     
@@ -279,6 +278,7 @@ World.prototype = {
                         if(this.froggy.following){             
                             this.time_trial += 1 / this.fps; 
                     
+                            
                         }else{
                             if(this.time_trial > 0){
                                 this.score += this.time_trial * 10;
@@ -289,7 +289,24 @@ World.prototype = {
                                 this.time_trial = 0;         
                             }            
                         }
-                    }                                         
+                    }
+                    
+                    // case 300 of levelProgression: Black Space and The Last Battle
+
+                    if(this.end_game){
+                     
+                        for(let e of this.enemies){
+                            this.game.gameEngine.removeObject(e);
+                        }      
+                        this.enemies.clear();                 
+                        this.number_enemies = 0;     
+
+                        if(this.boss === null){
+                            this.boss = new Boss(this.game,0,0, 60,35);
+
+                            this.messenger("The Boss of Space!", this.worldMessage);
+                        }
+                    }
 
                     for(let object of this.game.gameEngine.gameObjects){       
                 
@@ -299,12 +316,23 @@ World.prototype = {
                         // Handle exploding objects and setting the Score
                         this.game.scoreAndObjectHandler(object); 
                         
+                        // Handles the perspective we  have of an object. Either far (small object) away or close by (big object)
                         this.changePerspective(object);
                     }
                 }
             }
-        }else{
-            this.destroyWorld();
+        }else{          
+            this.destroyWorld(); // Remove everything from display and start anew               
+        }
+
+        //Sound for when the player wins
+        if(this.win){
+         
+            this.game.gameAudio.play(327.3, 0.1, "sine", 0.2).setFrequency(589.3, 0.4).stop(1.6);
+            this.game.gameAudio.play(327.3, 0.1, "sine", 0.6).setFrequency(489.3, 0.8).stop(1.0);
+            this.game.gameAudio.play(327.3, 0.1, "sine", 1.0).setFrequency(589.3, 1.2).stop(1.4);
+            this.game.gameAudio.play(689.3, 0.1, "sine ", 1.6).setFrequency(527.3, 1.8).stop(2.0);
+            this.game.gameAudio.play(689.3, 0.1, "sine ", 2.2).stop(2.4);
         }
     },
 
@@ -316,8 +344,8 @@ World.prototype = {
   destroyWorld : function(){
     for(let object of this.game.gameEngine.gameObjects){ 
       this.game.gameEngine.removeObject(object);    
-
     }
+   
     this.player = null;
     this.number_asteroids = ASTEROID_NUMBER;
     this.number_enemies = ENEMY_NUMBER;            
@@ -326,16 +354,16 @@ World.prototype = {
     this.meteor_shower.clear();
     this.planets.clear();
     this.froggy = null;
+    this.boss = null;
     this.time_keeper = 0;    
     this.death_time = 0; 
     this.counter = 0;
-    this.time_trial = 0; 
-    another_timer = Math.ceil(0.12 * 60);
-    if(this.letItRain){
-        this.letItRain = false;
-    }
-  },
-    
+    this.time_trial = 0;     
+    this.let_it_rain = false;
+    this.end_game = false;
+    this.win = false;
+    another_timer = Math.ceil(0.12 * 60);    
+  },    
 };
 
 

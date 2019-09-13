@@ -21,7 +21,7 @@ const Planet = function(game) {
     this.speed      = 100/ FPS;
     this.velocity_x = 100 / FPS;
     this.velocity_y = 0;   
-    this.live       = 500;   
+    this.health     = 800;   
     this.game       = game;  
 
     this.game.gameEngine.addObject(this);
@@ -91,9 +91,9 @@ Planet.prototype = {
     */
     update: function() {
 
-        if(this.live <= 0){          
+        if(this.health <= 0){          
             this.game.gameEngine.explode(this, this.game, 5);  
-          
+            this.game.world.let_it_rain = false;
         }else{  
 
             let distance = this.game.gameEngine.distanceBetweenPoints(

@@ -13,7 +13,8 @@ const Display = function(canvas, game, controller) {
   this.buffer  = document.createElement("canvas").getContext("2d");
   this.context = canvas.getContext("2d");
   this.game    = game;
-  this.control = controller;
+  this.control = controller;  
+  
 };
 
 Display.prototype = {
@@ -21,6 +22,9 @@ Display.prototype = {
   constructor : Display,
   message_time : 0,
   counter : 0,
+  score_message_time:0,
+  current_score : 0,
+  stars:[],
 
   /**
    * Drawing objects with four sides
@@ -42,7 +46,7 @@ Display.prototype = {
    */
   drawTriangle : function(object){
     this.buffer.strokeStyle = object.color;
-    this.buffer.lineWidth = object.width /10;
+    this.buffer.lineWidth = object.width /7;
 
     this.buffer.beginPath();
     //Ship's front
@@ -74,7 +78,7 @@ Display.prototype = {
   drawPolygon : function(object, filled) {
     if(!filled){
       this.buffer.strokeStyle = object.color;
-      this.buffer.lineWidth = object.width /10;
+      this.buffer.lineWidth = object.width /7;
     }else{
       this.buffer.fillStyle = object.color;
     }
@@ -124,6 +128,18 @@ Display.prototype = {
     }
   },
 
+  drawBoss: function(object){
+    this.buffer.fillStyle = 'grey';
+    this.buffer.fillRect(object.x, object.y, object.width, object.height);
+    this.buffer.fillStyle = 'rgb(169,71,18)';
+    this.buffer.fillRect(object.x + object.width/6, object.y + object.height, object.width/6, object.height/2);
+    this.buffer.fillRect(object.x + ((object.width/6)*4), object.y + object.height, object.width/6, object.height/2);
+    this.buffer.fillStyle = 'pink';
+    this.buffer.fillRect(object.x + ((object.width/6)+5), object.y - object.height/3, object.width/2, object.height/1.5);
+    this.buffer.fillStyle = 'red';
+    this.buffer.fillRect(object.x + object.width/2.5, object.y + object.height/3, object.width/5, object.height/2.5);
+  },
+
   /**
    * Function to fill the whole display 
    * 
@@ -149,7 +165,7 @@ Display.prototype = {
    */
   drawInfo : function(fill_style, text_size, text_align, x, y, width, message){
     this.buffer.fillStyle = fill_style;
-    this.buffer.font = "small-caps bold " + text_size + "px gamer";
+    this.buffer.font = "small-caps bold " + text_size + "px Segoe UI";
     this.buffer.textAlign = text_align;
 
     this.buffer.fillText(message, x, y, width);
@@ -158,37 +174,58 @@ Display.prototype = {
   /**
    * Shows Game info when player is not null
    */
-  showGameInfo : function(){
+  showGameInfo : function(clock){
     
     //Display time
-    this.drawInfo("#FFA500", TEXT_SIZE*1.5, 'left', 30, this.game.world.height - 65,
+    this.drawInfo("#FFA500", TEXT_SIZE, 'left', 30, this.game.world.height - 65,
       150, "Time: " + Math.round(this.game.world.time_keeper));  
-    
-    //Display Live left  
-    this.drawInfo("#FFA500", TEXT_SIZE*1.5, 'left', 30, this.game.world.height - 45,
-      150, "Live: " + Math.round(this.game.world.player.live)); 
+
+    //Display Health left  
+    this.drawInfo("#FFA500", TEXT_SIZE, 'left', 30, this.game.world.height - 45,
+      150, "Health: " + Math.round(this.game.world.player.health)); 
 
     //Display current score   
-    this.drawInfo("#FFA500", TEXT_SIZE*1.5, 'left', 30, this.game.world.height - 25,
-      150, "Score: " + Math.round(this.game.world.score));     
+    this.drawInfo("#FFA500", TEXT_SIZE, 'left', 30, this.game.world.height - 25,
+      150, "Score: " + Math.round(this.game.world.score));  
+      
+    //Display + score
+    if(this.game.world.score > this.current_score){
+      this.drawInfo("#65DF3A", TEXT_SIZE, 'left', 180, this.game.world.height - 25,
+        150, "+" + Math.round(this.game.world.score - this.current_score));       
+    }
+    // Display - score
+    else if(this.game.world.score < this.current_score){
+      this.drawInfo("#f60a0a", TEXT_SIZE, 'left', 180, this.game.world.height - 25,
+        150, "-" + Math.round(this.game.world.score - this.current_score));       
+    }
+
+    if(this.score_message_time === 0){
+      this.score_message_time = clock 
+    }      
+
+    // After 3 seconds the message will vanish
+    if(clock - this.score_message_time >= 1.2){    
+      this.current_score = this.game.world.score; 
+      this.score_message_time = 0;
+    }
     
     // When a time trail initiates and the Player escorts the Froggy around, keeping it alive,
     // a timer start going for extra points
     // On top of the rest.
     if(this.game.world.froggy !== null){
       if(this.game.world.froggy.following){ 
-        this.drawInfo("#FFA500", TEXT_SIZE*1.5, 'left', 30, this.game.world.height - 90,
+        this.drawInfo("#FFA500", TEXT_SIZE, 'left', 30, this.game.world.height - 90,
           150, "Time Trial: " + Math.round(this.game.world.time_trial));   
-      }      
-      
-      this.drawInfo("#FFA500", TEXT_SIZE*2, 'left', 30, 45, 250, 
-        "Time Trial Best: " + Math.round(this.game.world.time_trial_high) + " seconds");      
-      
-      if(this.game.world.froggy.explode_time <= 0){
-        this.drawInfo("#FFA500", TEXT_SIZE*2, 'left', 30, 70, 250, 
-          "Froggy died... R.I.P. Froggy");  
       }
-    }      
+
+      this.drawInfo("#FFA500", TEXT_SIZE*1.2, 'left', 30, 45, 250, 
+        "Time Trial Best: " + Math.round(this.game.world.time_trial_high) + " seconds");  
+      
+      this.drawInfo("#FFA500", TEXT_SIZE*1.2, 'left', 30, 70, 250, 
+        "Earn extra points");  
+        
+             
+    }  
   },
 
   /**
@@ -196,8 +233,10 @@ Display.prototype = {
    */
   showHighScore : function(){     
 
-    this.drawInfo("#FFA500", TEXT_SIZE*4, 'center', this.game.world.width/2, 50, this.game.world.width, 
-      "High Score: " + Math.round(localStorage.getItem(DSMS_HIGH_SCORES)));  
+    this.drawInfo("#FFA500", TEXT_SIZE*2.5, 'center', this.game.world.width/2, 50, this.game.world.width, 
+      "High Score: " + Math.round(localStorage.getItem(DSMS_HIGH_SCORES))); 
+    this.drawInfo("rgba(194,47,3, 0.5)", TEXT_SIZE, 'center', this.game.world.width/2, 80, this.game.world.width, 
+      "Survival Time: " + Math.round(localStorage.getItem(DSMS_TIME_TRIAL))); 
   },
 
   /**
@@ -205,17 +244,21 @@ Display.prototype = {
    */
   showGameOver : function(){       
       
-    this.drawInfo("#e3e3e3", TEXT_SIZE*6, 'center', this.game.world.width/2, this.game.world.height/2, this.game.world.width,
+    this.drawInfo("#e3e3e3", TEXT_SIZE*4, 'center', this.game.world.width/2, this.game.world.height/2, this.game.world.width,
       "GAME OVER"); 
-  },  
 
+    this.drawInfo("rgba(194,47,3, 1)", TEXT_SIZE*2.5, 'center', this.game.world.width/2, this.game.world.height/2 +100, this.game.world.width, 
+      "High Score: " + Math.round(localStorage.getItem(DSMS_HIGH_SCORES))); 
+    this.drawInfo("rgba(194,47,3, 1)", TEXT_SIZE, 'center', this.game.world.width/2, this.game.world.height/2+200, this.game.world.width, 
+      "Survival Time: " + Math.round(localStorage.getItem(DSMS_TIME_TRIAL))); 
+  },  
   
   /**
    * Render the canvas and all the text.
    */
   render : function() { 
 
-    if(this.game.world.start_game){
+    if(this.game.world.start_game){      
     
       if(!this.control.paused && !this.game.world.win){
       
@@ -224,22 +267,26 @@ Display.prototype = {
 
         // All in game text
         if(this.game.world.player !== null){     
-          if(this.game.world.player.live > 0){
+          if(this.game.world.player.health > 0){
 
             this.counter = 0; // reset respawn counter
             
             // Show Game Info on left botton of the screen
-            this.showGameInfo();
+            this.showGameInfo(clock);
             // Show High Score in the center top of the screen
             this.showHighScore();  
             // Press P to Pause text  
-            this.drawInfo("#CBCCCE", TEXT_SIZE, 'right', 
+            this.drawInfo("#CBCCCE", TEXT_SIZE/2, 'right', 
               this.game.world.width - 32, this.game.world.height - 50, this.game.world.width,
               "P to PAUSE");  
             // Press Backspace to go to start menu
-            this.drawInfo("#CBCCCE", TEXT_SIZE, 'right', 
+            this.drawInfo("#CBCCCE", TEXT_SIZE/2, 'right', 
               this.game.world.width - 32, this.game.world.height - 25, this.game.world.width,
               "BACKSPACE to RESTART");
+            // Hold Shift to go to go into a dream state
+            this.drawInfo("#CBCCCE", TEXT_SIZE/2, 'right', 
+            this.game.world.width - 32, this.game.world.height - 75, this.game.world.width,
+              "Hold SHIFT to DREAM");
 
           }else{
 
@@ -251,7 +298,7 @@ Display.prototype = {
             }  
             // Displays Continue counter      
         
-            this.drawInfo("#e3e3e3", TEXT_SIZE*6, 'center', 
+            this.drawInfo("#e3e3e3", TEXT_SIZE*4, 'center', 
             this.game.world.width/2, this.game.world.height/3.5, this.game.world.width,
               "Continue: " + Math.round(RESPAWN_TIME - (clock - this.counter)));
           }
@@ -271,14 +318,14 @@ Display.prototype = {
 
               if(object instanceof WorldMessage){
 
-                this.drawInfo(this.getGradient(), TEXT_SIZE*3, 'center', object.x, 
+                this.drawInfo(this.getGradient(), TEXT_SIZE*2, 'center', object.x, 
                   object.y - object.height/2, this.game.world.width, message);
 
-              }else{             
-
-                this.drawInfo("rgba(142,222,131)", TEXT_SIZE, 'center', object.x, 
+              }else{          
+                
+                this.drawInfo("rgba(142,222,131)", TEXT_SIZE/2, 'center', object.x, 
                   object.y - object.height/2, 300, message);
-              }            
+              }       
             }
 
             if(this.message_time === 0){
@@ -295,26 +342,40 @@ Display.prototype = {
               this.message_time = 0;        
             } 
           }       
-        }       
+        } 
+
+        //When the boss arrives, create a health bar
+        if(this.game.world.end_game){         
+          this.buffer.fillStyle = 'red';
+          if(this.game.world.boss !== null){
+            this.buffer.fillRect(this.game.world.width/2- this.game.world.boss.health/8, this.game.world.height-50, this.game.world.boss.health/4, 20);
+          }
+        }
+
       }else if(this.control.paused){
         // Draw Pause menu
 
+        //Blinking Paused
+        if(Math.round(this.game.spaceEngine.clock/1000) %2 === 1){
+          this.drawInfo("#ffffff", TEXT_SIZE*3, 'center',this.game.world.width/2, 100, 500,
+            "PAUSED"); 
+        } 
         
         //Display time
-        this.drawInfo("#FFA500", TEXT_SIZE*5, 'center', this.game.world.width/2,  225, this.game.world.width,
+        this.drawInfo("#FFA500", TEXT_SIZE*3.5, 'center', this.game.world.width/2,  225, this.game.world.width,
           "Time: " + Math.round(this.game.world.time_keeper));  
       
-        //Display Live left  
-        this.drawInfo("#FFA500", TEXT_SIZE*5, 'center', this.game.world.width/2, this.game.world.height /2, 
-          this.game.world.width,"Live: " + Math.round(this.game.world.player.live)); 
+        //Display health left  
+        this.drawInfo("#FFA500", TEXT_SIZE*3.5, 'center', this.game.world.width/2, this.game.world.height /2, 
+          this.game.world.width,"Health: " + Math.round(this.game.world.player.health)); 
 
         //Display current score   
-        this.drawInfo("#FFA500", TEXT_SIZE*5, 'center', this.game.world.width/2, this.game.world.height - 225,
+        this.drawInfo("#FFA500", TEXT_SIZE*3.5, 'center', this.game.world.width/2, this.game.world.height - 225,
           this.game.world.width, "Score: " + Math.round(this.game.world.score)); 
         
         //Display press Esc to Unpause
     
-        this.drawInfo("#cbccce", TEXT_SIZE, 'center',this.game.world.width/2, this.game.world.height - 25, 300,
+        this.drawInfo("#cbccce", TEXT_SIZE/2, 'center',this.game.world.width/2, this.game.world.height - 25, 300,
           "Press Escape to Unpause"); 
         
       }else if(this.game.world.win){
@@ -324,8 +385,8 @@ Display.prototype = {
       // If the Game is first opened....Show Start screen.
       this.startScreen();
     }
-
-    // Drawing the canvas (...last so that the rest gets placed on top)
+        
+    // Drawing the canvas 
     this.context.drawImage(
       this.buffer.canvas, 
       0, 0, 
@@ -355,12 +416,15 @@ Display.prototype = {
     this.context.imageSmoothingEnabled = false;
   },
   
+  /**
+   * Gradient style for World Messages
+   */
   getGradient: function(){
     let gradient = this.buffer.createLinearGradient(0, 0, this.game.world.width, this.game.world.height);
-    
-    gradient.addColorStop(0.2, "rgb(194,47,3)"); 
+        
+    gradient.addColorStop(0.3, "rgb(194,47,3)"); 
     gradient.addColorStop(0.5, "rgb(255,167,0)");   
-    gradient.addColorStop(0.8, "rgb(127,191,251)");   
+    gradient.addColorStop(0.7, "rgb(127,191,251)");   
 
     return gradient;
   },
@@ -369,32 +433,87 @@ Display.prototype = {
    * Draws everything we need for a start screen.
    */
   startScreen : function(){
+    this.drawShipAnimation();
+
+    this.drawInfo("rgba(255,255,255, 0.7)", TEXT_SIZE/2, 'center',  this.game.world.width/2, this.game.world.height/2 + 120, this.game.world.width,
+      "A '5 minute break' game. Get focused and energized and then... BACK to work!");
   
-    this.drawInfo("rgba(206,14,45, 0.3)", TEXT_SIZE, 'left',  32, 32, this.game.world.width,
+    this.drawInfo("rgba(255,255,255, 0.2)", TEXT_SIZE/2, 'left',  32, this.game.world.height -32, this.game.world.width,
       "David Damian === github.com/wisekrakr");
-    this.drawInfo("#ffffff", TEXT_SIZE * 1.5, 'left',  this.game.world.width/2 - 400, this.game.world.height/2 - 90, this.game.world.width,
+    this.drawInfo("#ffffff", TEXT_SIZE, 'left',  this.game.world.width/2 - 400, this.game.world.height/2 - 90, this.game.world.width,
       "Wisekrakr Games Presents:"); 
-    this.drawInfo(this.getGradient(), TEXT_SIZE*6, 'center', this.game.world.width/2, this.game.world.height/2, this.game.world.width,
+    this.drawInfo(this.getGradient(), TEXT_SIZE*4, 'center', this.game.world.width/2, this.game.world.height/2, this.game.world.width,
       "Don't Shoot Back"); 
-    this.drawInfo(this.getGradient(), TEXT_SIZE*3, 'center', this.game.world.width/2, this.game.world.height/2 + 90, this.game.world.width,
+    this.drawInfo(this.getGradient(), TEXT_SIZE*2, 'center', this.game.world.width/2, this.game.world.height/2 + 90, this.game.world.width,
       "A Space Passivist's Saga"); 
-    this.drawInfo(this.game.colorPicker(["red","white","blue"]), TEXT_SIZE*2, 'center',this.game.world.width/2, this.game.world.height - 100, 500,
+
+    if(Math.round(this.game.spaceEngine.clock/1000) %2 === 1){
+      this.drawInfo("#ffffff", TEXT_SIZE*2, 'center',this.game.world.width/2, this.game.world.height - 100, 500,
       "Press SPACE to Enter SPACE"); 
+    }
+    
   },
 
   /**
-   * Shows Game over text and time of death
+   * End screen
    */
   winScreen : function(){    
       
-    this.drawInfo(this.getGradient(), TEXT_SIZE*6, 'center', this.game.world.width/2, this.game.world.height/4, this.game.world.width,
+    this.drawInfo(this.getGradient(), TEXT_SIZE*4, 'center', this.game.world.width/2, this.game.world.height/4, this.game.world.width,
       "You Win!"); 
-    this.drawInfo(this.getGradient(), TEXT_SIZE*4, 'center', this.game.world.width/2, this.game.world.height/2, this.game.world.width,
+    this.drawInfo(this.getGradient(), TEXT_SIZE*3, 'center', this.game.world.width/2, this.game.world.height/2, this.game.world.width,
       "Score: " + Math.round(this.game.world.score)); 
-    this.drawInfo(this.game.colorPicker(["red","white","blue"]), TEXT_SIZE*3, 'center',
+    this.drawInfo(this.game.colorPicker(["red","white","blue"]), TEXT_SIZE*2, 'center',
       this.game.world.width/2, this.game.world.height - 100, this.game.world.width,
       "Press BACKSPACE to Go BACK to SPACE");     
-  },  
+  }, 
+
+  /**
+   * A Space ship with exhaust animation for esthetics.
+   */
+  drawShipAnimation:function(){
+    this.buffer.strokeStyle = "rgb(255,77,0)";
+    this.buffer.lineWidth = 20;
+
+    this.buffer.beginPath();
+    //Ship's front
+    this.buffer.moveTo(
+      (this.game.world.width - 200) + (4/3 * 60) * Math.cos(5),
+      (this.game.world.height -200) - (4/3 * 60) * Math.sin(5),
+    );
+    //Ship's rear left
+    this.buffer.lineTo(
+      (this.game.world.width - 200)  - 60 * (2/3 * Math.cos(5) + Math.sin(5)),
+      (this.game.world.height -200) + 60 * (2/3 * Math.sin(5) - Math.cos(5)),
+    );
+      //Ship's rear right
+    this.buffer.lineTo(
+      (this.game.world.width - 200)  - 60 * (2/3 * Math.cos(5) - Math.sin(5)),
+      (this.game.world.height -200) + 60 * (2/3 * Math.sin(5) + Math.cos(5)),
+    );
+    this.buffer.closePath();
+    this.buffer.stroke();  
+
+    // Exhaust
+    this.buffer.fillStyle = this.game.colorPicker(['rgb(255,0,0)', 'rgb(255,153,0)', 'rgb(255,255,102)' ]);
+    this.buffer.beginPath();
+    for(let i = 0; i < 5; i++){
+      this.buffer.arc((this.game.world.width - 200) - 60 * (i*0.33), (this.game.world.height -200) - 60 * i, 20, 0,i * Math.PI * 2, false); 
+    }
+    this.buffer.fill();
+    this.buffer.fillStyle = this.game.colorPicker(['rgb(255,0,0)', 'rgb(255,153,0)', 'rgb(255,255,102)' ]);
+    this.buffer.beginPath();
+    for(let i = 0; i < 5; i++){
+      this.buffer.arc((this.game.world.width - 200) - 80 * (i*0.66), (this.game.world.height -200) - 80 * i, 20, 0,i * Math.PI * 2, false); 
+    }
+    this.buffer.fill();
+    this.buffer.fillStyle = this.game.colorPicker(['rgb(255,0,0)', 'rgb(255,153,0)', 'rgb(255,255,102)' ]);
+    this.buffer.beginPath();
+    for(let i = 0; i < 5; i++){
+      this.buffer.arc((this.game.world.width - 200) - 100 * (i*0.50), (this.game.world.height -200) - 100 * i, 20, 0,i * Math.PI * 2, false); 
+    }
+    this.buffer.fill();
+  }
 
 };
   

@@ -9,12 +9,12 @@
 const Meteor = function(game,x, y) {
 
     this.tag        = "Meteor";
-    this.tag_nr      = Math.random();
+    this.tag_nr     = Math.random();
     this.color      = "rgb(180,230,245,0.6)";
-    this.width      = AS_WIDTH/3.3;    
-    this.height     = AS_HEIGHT/3.3; 
-    this.init_width = AS_WIDTH/3.3;
-    this.init_height= AS_HEIGHT/3.3;   
+    this.width      = AS_WIDTH/2.5;    
+    this.height     = AS_HEIGHT/2.5; 
+    this.init_width = AS_WIDTH/2.5;
+    this.init_height= AS_HEIGHT/2.5;   
     this.velocity_x = Math.random() * (AS_SPEED * 2) / FPS;
     this.velocity_y = Math.random() * (AS_SPEED * 2) / FPS;
     this.angle      = Math.random();
@@ -39,6 +39,7 @@ Meteor.prototype = {
     collided_with:null,  
     send_message:false,
     explode_time:EXPLODE_TIME,
+    my_messages:["Got em","Yup","Cya","No more","ya busted","too fast","splat","zzzzip","whack","pow!"],
 
     /**
     * If the meteor collides this will return true and also sets a collision object
@@ -64,7 +65,7 @@ Meteor.prototype = {
           if(target instanceof Planet){           
   
             if(this.target !== null){
-              if(this.game.gameEngine.distanceBetweenObjects(this,target) < 1000){
+              if(this.game.gameEngine.distanceBetweenObjects(this,target) < 800){
   
                 this.angle = this.game.gameEngine.angleBetweenObjects(this,target); 
             
@@ -94,17 +95,10 @@ Meteor.prototype = {
                 this.velocity_y = 0;  
 
                 if(!this.send_message){
-                    this.game.world.messenger("+100", this);                   
+                  this.game.world.messenger(this.my_messages[Math.floor(Math.random() * this.my_messages.length)], this);                      
                 }
             }
 
-            // // Bounce of collided object
-            // else{
-            //     this.angle = -this.game.gameEngine.angleBetweenObjects(this,this.collided_with);
-
-            //     this.velocity_x = -this.velocity_x * AS_SPEED;
-            //     this.velocity_y = -this.velocity_y * AS_SPEED;  
-            // }
         }else{
             this.x -= this.velocity_x * Math.cos(this.angle); 
             this.y -= this.velocity_y * Math.sin(this.angle); 

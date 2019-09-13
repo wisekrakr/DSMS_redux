@@ -14,7 +14,6 @@ window.addEventListener("load", function() {
         controller.keyDownUp(event.type, event.keyCode);
 
     };    
-      
     
     /**
      * Function called by the game loop every time rendering should be 
@@ -23,21 +22,15 @@ window.addEventListener("load", function() {
     let render = function() {
   
         display.fill(game.world.background_color);// Clear background to game's background color.
-        //  display.context.clearRect(0,0,game.world.width,game.world.height);
+
+
         // Give gameobjects their shape and color        
 
         for(let object of game.gameEngine.gameObjects){             
                                   
             switch(object.tag){
                 case 'Player':                                                           
-                    display.drawTriangle(object);     
-                    // if(object.invul){
-                    //     display.context.globalAlpha = 0.2;
-                    //     game.world.fps = 80;
-                    // }else{
-                    //     display.context.globalAlpha = 1;
-                    //     game.world.fps = FPS;
-                    // }
+                    display.drawTriangle(object);                     
                     break;                
                 case 'Planet': 
                     display.drawCircle(object, true);
@@ -51,14 +44,17 @@ window.addEventListener("load", function() {
                 case 'Meteor':  
                     display.drawPolygon(object, true);      
                     break;
-                case 'Enemy': case 'Froggy':                   
+                case 'Enemy': case 'Froggy':           
                     display.drawRectangle(object);                    
-                    break;                                
+                    break; 
+                case 'Boss':   
+                    display.drawBoss(object);   
+                    break;      
                 default:
                     console.log(object.tag + " :has no shape")
             } 
         }
-
+        
         display.render();  
     };
   
@@ -72,7 +68,15 @@ window.addEventListener("load", function() {
         if (controller.left.active)  { game.world.player.moveLeft();}
         if (controller.right.active) { game.world.player.moveRight(); }
         if (controller.up.active)    { game.world.player.forward();  }     
-        
+        if (controller.power.active) { 
+            display.context.globalAlpha = 0.2;
+            game.world.fps = 80;  
+            game.world.background_color = '#ffffff00';
+        }else{
+            display.context.globalAlpha = 1;
+            game.world.fps = FPS;  
+            game.world.background_color = '#000000';
+        }
              
         // Remove gameobjects
         if(game.gameEngine.toBeRemoved.length > 0){

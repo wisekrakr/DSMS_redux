@@ -21,7 +21,7 @@ const Player = function(game,x,y) {
   this.rotation   = 90 / 180 * Math.PI;  
   this.velocity_x = 0;
   this.velocity_y = 0;
-  this.live       = 100;
+  this.health     = 100;
   this.acc        = false;
   this.invul      = false;
   this.audio      = new AudioContext();
@@ -42,7 +42,6 @@ Player.prototype = {
   collided_with: null,
   my_messages:[], 
   send_message:false,
-
  
   forward:function() { this.acc = true;}, 
   moveLeft:function()  { this.rotation = this.rotate_speed /180 * Math.PI / this.game.world.fps; },
@@ -57,7 +56,8 @@ Player.prototype = {
     if(!this.invul){
       if(this.game.gameEngine.collisionObject(this) instanceof Asteroid || 
           this.game.gameEngine.collisionObject(this) instanceof Enemy || 
-          this.game.gameEngine.collisionObject(this) instanceof Laser){
+          this.game.gameEngine.collisionObject(this) instanceof Laser || 
+          this.game.gameEngine.collisionObject(this) instanceof Boss){
 
           this.collided_with = this.game.gameEngine.collisionObject(this);
 
@@ -111,9 +111,9 @@ Player.prototype = {
    */
   update:function() {      
     
-    // As long as the player has live
+    // As long as the player has health
 
-    if(this.live > 0){
+    if(this.health > 0){
 
       // When NOT colliding with something
       if(!this.collide()){

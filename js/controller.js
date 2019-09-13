@@ -10,6 +10,7 @@ const Controller = function(game) {
     this.left  = new Controller.ButtonInput();
     this.right = new Controller.ButtonInput();
     this.up    = new Controller.ButtonInput();   
+    this.power = new Controller.ButtonInput();  
     this.paused= false;
      
     this.keyDownUp = function(type, key_code) {
@@ -44,10 +45,13 @@ const Controller = function(game) {
                 this.game.world.start_game = true;   
             }
             break;
-        case 8: // Back to Start Menu            
+        case 8: // Backspace to Start Menu            
             this.game.world.start_game = false; 
-            this.game.world.win = false;
-            this.game.world.destroyWorld();
+            this.game.world.win = false;            
+            this.game.world.destroyWorld();     
+            break;
+        case 16: //Left shift to power up            
+            this.power.getInput(down);             
             break;
         default:
             console.error(key_code + ": This key is not yet defined")     

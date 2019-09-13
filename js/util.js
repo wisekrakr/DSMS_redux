@@ -8,14 +8,17 @@ const FPS = 60; // 60/1000 (60 frames per second)
 
 const EXPLODE_TIME = Math.ceil(0.12 * FPS); //Duration of explosion animation
 const DSMS_HIGH_SCORES = "dsms_highscores";
-const ASTEROID_NUMBER = 7; 
+const DSMS_TIME_TRIAL = "dsms_timetrial";
+const ASTEROID_NUMBER = 5; 
 const ENEMY_NUMBER = 1; 
+const RANDOM_X = Math.round(Math.random() * WIDTH);
+const RANDOM_Y = Math.round(Math.random() * HEIGHT);  
 
 /* Player constants */
 
 const PLAYER_WIDTH = 10;
 const PLAYER_HEIGHT = 10;
-const PLAYER_SPEED = 0.05 * FPS; 
+const PLAYER_SPEED = 0.07 * FPS; 
 const PLAYER_ROTATE_SPEED = 5 * FPS; // Rotate speed for the player
 
 const INVUL_TIME = 2; //Invulnerable time for the player after death
@@ -26,7 +29,6 @@ const BLINK_TIME = 4; //Blinking animation after death
 const ENEMY_WIDTH = 30;
 const ENEMY_HEIGHT = 10; 
 const ENEMY_SPEED = 1.5 * FPS;
-const ENEMY_TURN_SPEED = 6 * FPS; // Speed to turn towards a target
 const ENEMY_RANGE = 350; // Radius range for the enemy to attack in
 
 /* Laser constants */

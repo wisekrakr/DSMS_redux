@@ -6,10 +6,11 @@
  * @param  {} x position on x-axis
  * @param  {} y position on y-axis
  */
-const Enemy = function(game, x, y, w, h) {
+const Enemy = function(game, x, y, w, h, mark) {
 
     this.tag        = "Enemy";
-    this.tag_nr      = Math.random();
+    this.mark       = mark;
+    this.tag_nr     = Math.random();
     this.color      = game.colorPicker(["#e03e69","#20b3a2", "#657a87", "#935f7b", "#b5c68a"]);
     this.width      = w;   
     this.height     = h; 
@@ -19,12 +20,7 @@ const Enemy = function(game, x, y, w, h) {
     this.velocity_y = Math.random() * ENEMY_SPEED / FPS;
     this.x          = x;
     this.y          = y;    
-    this.angle      = 0;
-    this.speed      = ENEMY_SPEED;
-    this.turnSpeed  = ENEMY_TURN_SPEED;
-    this.rotation   = 0;  
-    this.range      = ENEMY_RANGE;  
-    this.canShoot   = false;    
+    this.angle      = 0;          
     this.game       = game;  
   
     this.game.gameEngine.addObject(this);  
@@ -34,8 +30,8 @@ const Enemy = function(game, x, y, w, h) {
   
     constructor : Enemy,   
     explode_time: EXPLODE_TIME,
-    lastShot: 0,                        
-    fireRate: FIRE_RATE,
+    can_shoot : false, 
+    last_shot: 0,  
     my_messages: [
       "I will shoot you!",
       "come BACK here!",
@@ -46,29 +42,33 @@ const Enemy = function(game, x, y, w, h) {
       "By Grabthar’s hammer",
       "...I've seen things...",
       "weehoo!",
-      "To infinity and beyond"
+      "To infinity and beyond",
+      "dodge this",
+      "js13kGames made me do it!",
+      "don't get cocky",
+      "do a barrel role",
+      "You may call me Hal"
     ],     
-    send_message:false,
-    audio: new AudioContext(), 
+    send_message:false,  
     
     /**
      * Function to angle towards the player and away from asteroids, when in range 
      */
-    behavior: function(){
+    behavior: function(attack_range){
       for(let target of this.game.gameEngine.gameObjects){    
         if(target instanceof Player){     
 
           if(this.target !== null){
-            if(this.game.gameEngine.distanceBetweenObjects(this,target) < this.range &&
+            if(this.game.gameEngine.distanceBetweenObjects(this,target) < attack_range &&
             this.game.gameEngine.distanceBetweenObjects(this,target) > target.width * 2){
 
               this.angle = this.game.gameEngine.angleBetweenObjects(this,target); 
 
-              this.canShoot = true;
+              this.can_shoot = true;
         
             }else{
 
-              this.canShoot = false;
+              this.can_shoot = false;
                            
             }
           }
@@ -88,19 +88,19 @@ const Enemy = function(game, x, y, w, h) {
      * Function that handles creating lasers and shooting towards the player,
      * with a certain fire rate
      */
-    shootLaser: function(){
+    shootLaser: function(fire_rate){
       
       // Create laser object and fire it      
       let time = this.game.spaceEngine.clock/1000;
 
-      if(this.lastShot === 0){
-        this.lastShot = time;
+      if(this.last_shot === 0){
+        this.last_shot = time;
       }      
  
-      if(this.canShoot){   
+      if(this.can_shoot){   
           
-        if(time - this.lastShot >= this.fireRate){        
-
+        if(time - this.last_shot >= fire_rate){      
+      
           new Laser(
             this.game,
             this.x + this.width/4 * Math.cos(this.angle),
@@ -109,13 +109,11 @@ const Enemy = function(game, x, y, w, h) {
             this
           );
 
-          this.lastShot = time;
+          this.last_shot = time;
 
           // Laser sound
-          this.game.gameAudio.play(300, 0.1, "sine").stop(0.1);    
-          this.game.gameAudio.play(350, 0.1, "sine", 0.1).stop(0.2);     
-          this.game.gameAudio.play(400, 0.1, "sine", 0.2).stop(0.3);  
-          this.game.gameAudio.play(450, 0.1, "sine", 0.3).stop(0.4);   
+          this.game.gameAudio.play(200, 0.1, "square").stop(0.1);           
+          this.game.gameAudio.play(350, 0.1, "square", 0.1).stop(0.2);   
         }
       }
     }, 
@@ -143,15 +141,29 @@ const Enemy = function(game, x, y, w, h) {
         this.x -= this.velocity_x * Math.cos(this.angle);
         this.y -= this.velocity_y * Math.sin(this.angle);
 
-        this.behavior(); 
-        this.shootLaser();
-        
+        switch(this.mark){
+          case 1:
+            this.behavior(ENEMY_RANGE/2); 
+            this.shootLaser(FIRE_RATE*2);
+            break;
+          case 2: 
+            this.behavior(ENEMY_RANGE); 
+            this.shootLaser(FIRE_RATE);
+            break;
+          case 3:
+            this.behavior(ENEMY_RANGE*2); 
+            this.shootLaser(FIRE_RATE/2);
+            break;               
+        }
+       
         //Messaging
-        if(this.canShoot){
+        if(this.can_shoot){
           if(!this.send_message){
             this.game.world.messenger(this.my_messages[Math.floor(Math.random() * this.my_messages.length)], this);           
           }     
-        }
+        }       
+        
+        
       }else{
           this.game.gameEngine.explode(this, this.game,2);
       }

@@ -8,7 +8,7 @@
 const Asteroid = function(game,x, y, w, h) {
 
     this.tag        = "Asteroid";
-    this.tag_nr      = Math.random();
+    this.tag_nr     = Math.random();
     this.color      = "rgba(255,255,255,0.3)";
     this.width      = w;    
     this.height     = h;
@@ -45,7 +45,8 @@ Asteroid.prototype = {
     collide: function () {       
         if(this.game.gameEngine.collisionObject(this) instanceof Enemy || 
             this.game.gameEngine.collisionObject(this) instanceof Player || 
-            this.game.gameEngine.collisionObject(this) instanceof Laser){
+            this.game.gameEngine.collisionObject(this) instanceof Laser || 
+            this.game.gameEngine.collisionObject(this) instanceof Boss){
           
             this.collided_with = this.game.gameEngine.collisionObject(this);
 
@@ -62,7 +63,7 @@ Asteroid.prototype = {
          
         if(this.collide()){
             //Check what kind of object and either explode or blow in pieces   
-            this.game.gameEngine.explode(this, this.game, 3);
+            this.game.gameEngine.explode(this, this.game, 3);            
 
         }else{
              //Set the appropriate speed and direction 

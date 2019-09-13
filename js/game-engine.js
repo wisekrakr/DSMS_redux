@@ -138,12 +138,12 @@ GameEngine.prototype = {
     },
 
     /**
-     * Function to subtract damage taken from live (health percentage)
+     * Function to subtract damage taken from health 
      */
     subtractFromLive: function(object){
         let damage = (object.collided_with.width + object.collided_with.height) / 2;
 
-        object.live -= damage;  
+        object.health -= damage;  
     },
     
     /**

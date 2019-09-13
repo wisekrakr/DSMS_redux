@@ -13,10 +13,10 @@ const GameAudio = function(audioContext){
 }
 
 /**
- * Changes the frequency in Hz, now or in the future.
+ * Changes the frequency in Hz, immediately or specific time
  * 
  * @param  {} val value
- * @param  {} when to start
+ * @param  {} when the moment to start
  */
 GameAudio.prototype.setFrequency = function(val, when) {
     if(when) {
@@ -28,10 +28,10 @@ GameAudio.prototype.setFrequency = function(val, when) {
 };
 
 /**
- * Changes the volume multiplier, now or in the future.
+ * Changes the volume multiplier, immediately or specific time
  * 
  * @param  {} val value
- * @param  {} when to start
+ * @param  {} when the moment to start
  */
 GameAudio.prototype.setVolume = function(val, when) {   
     if(when) {
@@ -53,12 +53,12 @@ GameAudio.prototype.setWaveType = function(waveType) {
 };
 
 /**
- * Creates an OscillatorNode to play the specified sound and starts playing, now or in the future.
+ * Creates an OscillatorNode to play the specified sound and starts playing, immediately or specific time
  * 
  * @param  {} freq frequency
  * @param  {} vol volume
  * @param  {} wave wave type
- * @param  {} when to start playing
+ * @param  {} when the moment to start playing
  */
 GameAudio.prototype.play = function(freq, vol, wave, when) {
     this.oscillator = this.context.createOscillator();
@@ -83,9 +83,9 @@ GameAudio.prototype.play = function(freq, vol, wave, when) {
 },
 
 /**
- * Stops audio from playing, now or in the future.
+ * Stops audio from playing, immediately or specific time
  * 
- * @param  {} when to stop playing
+ * @param  {} when the moment to stop playing
  */
 GameAudio.prototype.stop = function(when) {
     this.gainNode.connect(this.compressor);  
