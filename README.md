@@ -12,14 +12,14 @@ Accumulate points by dodging lasers and making them hit asteroids. Make enemies 
 let them destroy themselves.
 Do all this for 5 minutes and fight The Boss of Space! And then BACK to work.
 
-The engine will run and update the game. 
-The game-engine will create objects and handles various object related calculations, like distance or angle between objects. 
+The engine will run and update the game. <br>
+The game-engine will create objects and handles various object related calculations, like distance or angle between objects. <br>
   This will also handle collisions between objects, which are initiated within the object class itself.
-The main class will start the game, handles updating drawing objects and removing them. 
-The display will hold all functions that initiate shapes and text on the screen. The canvas is created here.
-The controller will handle key inputs.
-The audio will hold functions to create sounds that can be used all over the game.
-The game class will initiate object in game and updates score. It will also handle updating all objects, as well as the world itself.
-The world class will handle the game mechanics and level progression.
+The main class will start the game, handles updating drawing objects and removing them. <br>
+The display will hold all functions that initiate shapes and text on the screen. The canvas is created here.<br>
+The controller will handle key inputs.<br>
+The audio will hold functions to create sounds that can be used all over the game.<br>
+The game class will initiate object in game and updates score. It will also handle updating all objects, as well as the world itself.<br>
+The world class will handle the game mechanics and level progression.<br>
 
 Play it here https://wisekrakr.github.io/DSMS_redux/index.html
