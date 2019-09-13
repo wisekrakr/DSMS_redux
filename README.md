@@ -23,3 +23,5 @@ The game class will initiate object in game and updates score. It will also hand
 The world class will handle the game mechanics and level progression.<br>
 
 Play it here https://wisekrakr.github.io/DSMS_redux/index.html
+
+![](DSMS_redux_start.gif)
